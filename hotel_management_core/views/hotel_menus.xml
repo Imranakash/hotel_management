@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_hotel_management_root"
+              name="Hotel Management"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_operations"
+              name="Operations"
+              parent="menu_hotel_management_root"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_configuration"
+              name="Configuration"
+              parent="menu_hotel_management_root"
+              sequence="90"/>
+
+    <menuitem id="menu_hotel_property"
+              name="Hotels &amp; Resorts"
+              parent="menu_hotel_configuration"
+              action="action_hotel_property"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_room"
+              name="Rooms &amp; Units"
+              parent="menu_hotel_configuration"
+              action="action_hotel_room"
+              sequence="20"/>
+
+    <menuitem id="menu_hotel_guest"
+              name="Guest Profiles"
+              parent="menu_hotel_operations"
+              action="action_hotel_guest"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_booking"
+              name="Reservations"
+              parent="menu_hotel_operations"
+              action="action_hotel_booking"
+              sequence="20"/>
+
+    <menuitem id="menu_hotel_folio"
+              name="Hotel Folios"
+              parent="menu_hotel_operations"
+              action="action_hotel_folio"
+              sequence="30"/>
+
+
+</odoo>

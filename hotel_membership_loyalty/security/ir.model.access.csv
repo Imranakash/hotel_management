@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_membership_tier_mgr,membership.tier.mgr,model_hotel_membership_tier,hotel_membership_loyalty.group_membership_manager,1,1,1,1
+access_membership_tier_staff,membership.tier.staff,model_hotel_membership_tier,hotel_membership_loyalty.group_membership_staff,1,0,0,0
+access_membership_benefit_mgr,membership.benefit.mgr,model_hotel_membership_benefit,hotel_membership_loyalty.group_membership_manager,1,1,1,1
+access_loyalty_rule_mgr,loyalty.rule.mgr,model_hotel_loyalty_rule,hotel_membership_loyalty.group_membership_manager,1,1,1,1
+access_loyalty_rule_staff,loyalty.rule.staff,model_hotel_loyalty_rule,hotel_membership_loyalty.group_membership_staff,1,0,0,0
+access_loyalty_history_staff,loyalty.history.staff,model_hotel_loyalty_history,hotel_membership_loyalty.group_membership_staff,1,1,1,0
+access_loyalty_history_mgr,loyalty.history.mgr,model_hotel_loyalty_history,hotel_membership_loyalty.group_membership_manager,1,1,1,1

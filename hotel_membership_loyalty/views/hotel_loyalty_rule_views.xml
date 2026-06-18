@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Loyalty Rule List View -->
+    <record id="view_hotel_loyalty_rule_list" model="ir.ui.view">
+        <field name="name">hotel.loyalty.rule.list</field>
+        <field name="model">hotel.loyalty.rule</field>
+        <field name="arch" type="xml">
+            <list string="Loyalty Earning Rules">
+                <field name="name"/>
+                <field name="rule_type"/>
+                <field name="amount_per_point"/>
+                <field name="valid_from"/>
+                <field name="valid_to"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Loyalty Rule Form View -->
+    <record id="view_hotel_loyalty_rule_form" model="ir.ui.view">
+        <field name="name">hotel.loyalty.rule.form</field>
+        <field name="model">hotel.loyalty.rule</field>
+        <field name="arch" type="xml">
+            <form string="Loyalty Rule">
+                <sheet>
+                    <group>
+                        <group string="Rule Definition">
+                            <field name="name"/>
+                            <field name="rule_type"/>
+                        </group>
+                        <group string="Validity &amp; Matrix">
+                            <field name="amount_per_point"/>
+                            <field name="valid_from"/>
+                            <field name="valid_to"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_hotel_loyalty_rule" model="ir.actions.act_window">
+        <field name="name">Earning Rules Setup</field>
+        <field name="res_model">hotel.loyalty.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

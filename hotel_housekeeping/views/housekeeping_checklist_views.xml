@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_hotel_housekeeping_checklist_list" model="ir.ui.view">
+            <field name="name">hotel.housekeeping.checklist.list</field>
+            <field name="model">hotel.housekeeping.checklist</field>
+            <field name="arch" type="xml">
+                <list string="Housekeeping Checklists">
+                    <field name="name"/>
+                    <field name="task_type"/>
+                    <field name="requires_photo"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_hotel_housekeeping_checklist_form" model="ir.ui.view">
+            <field name="name">hotel.housekeeping.checklist.form</field>
+            <field name="model">hotel.housekeeping.checklist</field>
+            <field name="arch" type="xml">
+                <form string="Housekeeping Checklist">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" string="Checklist Name"/>
+                            <h1><field name="name" placeholder="e.g., Suite Room Checkout Cleaning"/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="task_type"/>
+                                <field name="requires_photo"/>
+                            </group>
+                            <group>
+                                <field name="room_type_ids" widget="many2many_tags" placeholder="Select Room Types..."/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Checklist Items/Lines" name="checklist_lines">
+                                <field name="line_ids">
+                                    <list editable="bottom">
+                                        <field name="name" placeholder="e.g., Change bedsheets"/>
+                                        <field name="is_mandatory"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_hotel_housekeeping_checklist" model="ir.actions.act_window">
+            <field name="name">Master Checklists</field>
+            <field name="res_model">hotel.housekeeping.checklist</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>

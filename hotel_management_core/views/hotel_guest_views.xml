@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_hotel_guest" model="ir.ui.view">
+        <field name="name">res.partner.form.hotel.guest</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <widget name="web_ribbon" title="⚠️ BLACKLISTED" bg_color="text-bg-danger" invisible="not is_blacklisted_guest"/>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="is_hotel_guest" widget="boolean_toggle"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Hospitality Profile" name="hospitality_profile" invisible="not is_hotel_guest">
+                    <group>
+                        <group string="Identification">
+                            <field name="id_type" required="is_hotel_guest"/>
+                            <field name="id_number" required="is_hotel_guest"/>
+                        </group>
+                        <group string="Loyalty">
+                            <field name="vip_tier" widget="priority"/>
+                            <field name="is_blacklisted_guest" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_hotel_guest" model="ir.actions.act_window">
+        <field name="name">Guest Profiles</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_hotel_guest', '=', True)]</field>
+        <field name="context">{'default_is_hotel_guest': True}</field>
+    </record>
+</odoo>

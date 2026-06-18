@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_hotel_folio_bill" model="ir.actions.report">
+        <field name="name">Folio Bill / Invoice</field>
+        <field name="model">hotel.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management_core.report_hotel_folio_bill_template</field>
+        <field name="report_file">hotel_management_core.report_hotel_folio_bill_template</field>
+        <field name="binding_model_id" ref="model_hotel_booking"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_hotel_folio_bill_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333;">
+
+                        <div class="row mb-4" style="border-bottom: 3px solid #34495E; padding-bottom: 10px;">
+                            <div class="col-6">
+                                <h2 style="font-weight: bold; color: #2C3E50; margin: 0;">FOLIO INVOICE</h2>
+                                <small class="text-muted">Hotel &amp; Resort Management System</small>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h4 style="font-weight: bold; color: #7F8C8D; margin: 0;"><span t-field="doc.property_id.name"/></h4>
+                                <span t-field="doc.company_id.partner_id.city"/>, <span t-field="doc.company_id.partner_id.country_id.name"/>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4" style="font-size: 14px; line-height: 1.6;">
+                            <div class="col-6">
+                                <strong style="color: #2C3E50; text-transform: uppercase;">Bill To (Guest Details):</strong><br/>
+                                <span t-field="doc.guest_id.name" style="font-size: 16px; font-weight: bold; color: #2C3E50;"/><br/>
+                                <span t-if="doc.guest_id.street"><span t-field="doc.guest_id.street"/><br/></span>
+                                <span t-if="doc.guest_id.phone"><strong>Phone:</strong> <span t-field="doc.guest_id.phone"/><br/></span>
+                                <span t-if="doc.guest_id.email"><strong>Email:</strong> <span t-field="doc.guest_id.email"/></span>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong style="color: #2C3E50; text-transform: uppercase;">Invoice Details:</strong><br/>
+                                <strong>Folio / Booking Ref:</strong> <span t-field="doc.name" style="font-weight: bold; color: #2980B9;"/><br/>
+                                <strong>Check-In:</strong> <span t-field="doc.checkin_date" t-options='{"widget": "datetime"}'/><br/>
+                                <strong>Check-Out:</strong> <span t-field="doc.checkout_date" t-options='{"widget": "datetime"}'/><br/>
+                                <strong>Status:</strong>
+                                <span t-field="doc.state" class="badge" style="text-transform: uppercase; font-weight: bold; background-color: #2ECC71; color: white; padding: 3px 8px; font-size: 11px;"/>
+                            </div>
+                        </div>
+
+                        <h4 class="mb-2" style="font-size: 16px; font-weight: bold; color: #2C3E50; text-transform: uppercase; letter-spacing: 0.5px;">Room Charges Breakdown</h4>
+                        <table class="table table-sm" style="font-size: 14px; margin-bottom: 30px;">
+                            <thead style="background-color: #34495E; color: white;">
+                                <tr>
+                                    <th class="text-start" style="padding: 8px; border: none;">Description / Room Details</th>
+                                    <th class="text-center" style="padding: 8px; border: none;">Room No</th>
+                                    <th class="text-end" style="padding: 8px; border: none;">Rate / Night</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.room_line_ids" t-as="line">
+                                    <tr style="border-bottom: 1px solid #E2E8F0;">
+                                        <td style="padding: 10px 8px; vertical-align: middle;">
+                                            <span t-field="line.room_type_id.name" style="font-weight: bold; color: #2D3748;"/>
+                                        </td>
+                                        <td class="text-center" style="padding: 10px 8px; vertical-align: middle;">
+                                            <span t-field="line.room_id.name" class="badge bg-light text-dark" style="border: 1px solid #CBD5E0; padding: 4px 8px;"/>
+                                        </td>
+                                        <td class="text-end" style="padding: 10px 8px; vertical-align: middle; font-weight: 500;">
+                                            <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="row justify-content-end" style="margin-top: 20px;">
+                            <div class="col-5">
+                                <table class="table table-sm" style="font-size: 14px; border-top: 2px solid #34495E;">
+                                    <tr>
+                                        <td style="padding: 8px 0;"><strong>Subtotal</strong></td>
+                                        <td class="text-end" style="padding: 8px 0;">
+                                            <span t-out="sum(line.price_unit for line in doc.room_line_ids)" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}' style="font-weight: 500;"/>
+                                        </td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #E2E8F0;">
+                                        <td style="padding: 8px 0; color: #718096;">Taxes &amp; Fees (0%)</td>
+                                        <td class="text-end" style="padding: 8px 0; color: #718096;">
+                                            <span>0.00</span>
+                                        </td>
+                                    </tr>
+                                    <tr style="font-size: 16px; background-color: #F8F9FA;">
+                                        <td style="padding: 10px; color: #2C3E50;"><strong>Total Amount Due</strong></td>
+                                        <td class="text-end" style="padding: 10px; color: #2C3E50;">
+                                            <strong>
+                                                <span t-out="sum(line.price_unit for line in doc.room_line_ids)" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-top: 50px; font-size: 12px; color: #718096;">
+                            <div class="col-12 text-center" style="border-top: 1px solid #E2E8F0; padding-top: 15px;">
+                                <p style="margin-bottom: 5px;">Thank you for staying with us at <strong><span t-field="doc.property_id.name"/></strong>!</p>
+                                <p>This is a computer-generated official folio statement. No physical signature is required unless requested.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

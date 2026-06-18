@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_hotel_booking_receipt" model="ir.actions.report">
+        <field name="name">Booking Receipt</field>
+        <field name="model">hotel.booking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management_core.report_hotel_booking_receipt_template</field>
+        <field name="report_file">hotel_management_core.report_hotel_booking_receipt_template</field>
+        <field name="binding_model_id" ref="model_hotel_booking"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_hotel_booking_receipt_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2 style="font-weight: bold; color: #2C3E50; text-transform: uppercase; border-bottom: 2px solid #2C3E50; padding-bottom: 5px;">
+                                    Booking Summary Receipt
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4" style="font-size: 14px;">
+                            <div class="col-6">
+                                <strong>Guest Details:</strong><br/>
+                                <span t-field="doc.guest_id.name" style="font-size: 16px; font-weight: bold;"/><br/>
+                                <span t-if="doc.guest_id.phone">Phone: <span t-field="doc.guest_id.phone"/><br/></span>
+                                <span t-if="doc.guest_id.email">Email: <span t-field="doc.guest_id.email"/></span>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Booking Reference:</strong> <span t-field="doc.name" style="font-weight: bold;"/><br/>
+                                <strong>Hotel/Property:</strong> <span t-field="doc.property_id.name"/><br/>
+                                <strong>Booking Date:</strong> <span t-field="doc.booking_date" t-options='{"widget": "date"}'/><br/>
+                                <strong>Status:</strong> <span t-field="doc.state" style="text-transform: uppercase; font-weight: bold; color: #2980B9;"/>
+                            </div>
+                        </div>
+
+                        <div class="row p-3 mb-4" style="background-color: #F8F9FA; border-radius: 5px; border: 1px solid #DEE2E6;">
+                            <div class="col-6 text-center" style="border-right: 1px solid #DEE2E6;">
+                                <small class="text-muted" style="text-transform: uppercase; font-weight: bold;">Check-In Date</small>
+                                <h5 t-field="doc.checkin_date" t-options='{"widget": "datetime"}' style="margin-top: 5px; font-weight: bold; color: #2C3E50;"/>
+                            </div>
+                            <div class="col-6 text-center">
+                                <small class="text-muted" style="text-transform: uppercase; font-weight: bold;">Check-Out Date</small>
+                                <h5 t-field="doc.checkout_date" t-options='{"widget": "datetime"}' style="margin-top: 5px; font-weight: bold; color: #2C3E50;"/>
+                            </div>
+                        </div>
+
+                        <h4 class="mb-2" style="font-size: 16px; font-weight: bold; color: #2C3E50;">Allocated Rooms &amp; Rates</h4>
+                        <table class="table table-sm table-striped" style="border: 1px solid #DEE2E6; font-size: 14px;">
+                            <thead style="background-color: #2C3E50; color: white;">
+                                <tr>
+                                    <th class="text-start" style="padding: 8px;">Room Type / Category</th>
+                                    <th class="text-center" style="padding: 8px;">Specific Room No</th>
+                                    <th class="text-end" style="padding: 8px;">Rate per Night</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.room_line_ids" t-as="line">
+                                    <tr>
+                                        <td style="padding: 8px;"><span t-field="line.room_type_id.name"/></td>
+                                        <td class="text-center" style="padding: 8px;"><span t-field="line.room_id.name"/></td>
+                                        <td class="text-end" style="padding: 8px;">
+                                            <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="row" style="margin-top: 80px; font-size: 14px;">
+                            <div class="col-6 text-start">
+                                <div style="border-top: 1px solid #2C3E50; width: 180px; text-align: center; padding-top: 5px;">
+                                    Guest Signature
+                                </div>
+                            </div>
+                            <div class="col-6 text-end d-flex justify-content-end">
+                                <div style="border-top: 1px solid #2C3E50; width: 180px; text-align: center; padding-top: 5px;">
+                                    Authorized Signature
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hotel_booking_form" model="ir.ui.view">
+        <field name="name">hotel.booking.form</field>
+        <field name="model">hotel.booking</field>
+        <field name="arch" type="xml">
+            <form string="Reservation / Booking">
+                <header>
+                    <button name="action_approve_discount"
+                            string="Approve Discount"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'waiting_approval'"
+                            groups="hotel_management_core.group_hotel_manager"/>
+
+                    <button name="action_reject_discount"
+                            string="Reject Discount"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'waiting_approval'"
+                            groups="hotel_management_core.group_hotel_manager"/>
+
+                    <button name="action_set_to_draft" string="Reset to Draft" type="object"
+                            invisible="state not in ['confirmed', 'waiting_approval', 'cancelled']"/>
+
+                    <button name="action_confirm" string="Confirm Booking" type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_check_in"
+                            string="Check In Guest"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'confirmed'"/>
+
+                    <button name="action_check_out" string="Guest Check-Out" type="object" class="btn-primary"
+                            invisible="state != 'checked_in'"/>
+                    <button name="button_trigger_room_move_test"
+                            string="🔄 Move Room "
+                            type="object"
+                            class="btn-warning"
+                            invisible="state != 'checked_in'"/>
+
+                    <button name="action_cancel"
+                            string="Cancel Booking"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state in ['cancelled', 'checked_in', 'checked_out']"
+                            confirm="Are you sure you want to cancel this booking?"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,waiting_approval,confirmed,checked_in,checked_out"/>
+                </header>
+                <sheet>
+                    <!-- 🌟 UAT-010: ক্রেডিট লিমিট পার হলে ম্যানেজারের জন্য এলার্ট ব্যানার -->
+                    <widget name="web_ribbon" title="Credit Exceeded" bg_color="text-bg-danger"
+                            invisible="is_credit_exceeded == False"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_connected_folios" type="object" class="oe_stat_button"
+                                icon="fa-file-text-o">
+                            <field name="folio_count" widget="statinfo" string="Folios"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Guest &amp; Property">
+                            <field name="property_id" options="{'no_create': True}"/>
+                            <field name="guest_id" context="{'default_is_hotel_guest': True}"/>
+                            <field name="booking_source"/>
+                        </group>
+                        <group string="Stay Dates">
+
+                            <field name="booking_date"/>
+                            <field name="checkin_date"/>
+                            <field name="checkout_date"/>
+                            <field name="deposit_amount" string="Advance Deposit Received"/>
+                            <field name="discount_amount" string="Discount Amount" widget="monetary"
+                                   invisible="state in ['checked_in', 'checked_out']"/>
+                            <field name="payment_state" widget="badge"
+                                   decoration-warning="payment_state == 'partially_paid'"
+                                   decoration-danger="payment_state == 'unpaid'"/>
+                            <field name="agent_commission" invisible="booking_source not in ['ota', 'corporate']"
+                                   readonly="state == 'cancelled'"/>
+
+                            <field name="is_credit_exceeded" invisible="booking_source != 'corporate'"
+                                   class="text-danger oe_bold"/>
+                            <field name="approval_reason" placeholder="Write reason for approve/reject..."
+                                   invisible="state != 'waiting_approval' and not approval_reason"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Room Allocations" name="room_allocations">
+                            <field name="room_line_ids">
+                                <list string="Room Allocations" editable="bottom">
+                                    <field name="room_type_id" options="{'no_create': True, 'no_open': True}"/>
+
+                                    <field name="room_id" required="1"
+                                           options="{'no_create': True}"
+                                           domain="[('property_id', '=', parent.property_id), ('room_type_id', '=', room_type_id), ('status', '=', 'available')]"/>
+
+                                    <field name="price_unit"/>
+                                    <field name="extra_bed_count"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Cancellation &amp; Refunds" name="cancellation_refunds"
+                              invisible="state != 'cancelled'">
+                            <group>
+                                <group string="Refund &amp; Penalty Settlement">
+                                    <field name="cancellation_date" readonly="1"/>
+                                    <field name="deposit_amount" readonly="1" string="Total Advance Deposit"/>
+                                    <field name="refund_amount" widget="monetary" readonly="1"
+                                           class="text-success oe_bold" string="Amount to Refund"/>
+                                    <field name="forfeiture_amount" widget="monetary" readonly="1"
+                                           class="text-danger oe_bold" string="Forfeiture (Penalty Fee)"/>
+                                </group>
+                                <group string="Channel/OTA Commission Reversal"
+                                       invisible="booking_source not in ['ota', 'corporate']">
+                                    <field name="agent_commission" widget="monetary" readonly="1"
+                                           string="Original Commission"/>
+                                    <field name="commission_status" widget="badge"
+                                           decoration-danger="commission_status == 'reversed'"
+                                           decoration-success="commission_status == 'active'"
+                                           decoration-info="commission_status == 'na'"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Room Move History" name="room_move_history"
+                              invisible="state not in ['checked_in', 'checked_out']">
+                            <field name="room_move_ids">
+                                <list create="false" edit="false">
+                                    <field name="move_datetime"/>
+                                    <field name="old_room_id"/>
+                                    <field name="new_room_id"/>
+                                    <field name="move_reason"/>
+                                    <field name="moved_by_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Connected Folios">
+                            <field name="folio_ids" readonly="1">
+                                <list string="Folios">
+                                    <field name="folio_no" string="Folio Number"/>
+                                    <field name="guest_id"/>
+                                    <field name="amount_net_total" string="Total Charges" widget="monetary"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'open'"
+                                           decoration-success="state == 'billed'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_booking_list" model="ir.ui.view">
+        <field name="name">hotel.booking.list</field>
+        <field name="model">hotel.booking</field>
+        <field name="arch" type="xml">
+            <list string="Reservations" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'">
+                <field name="name"/>
+                <field name="guest_id"/>
+                <field name="property_id"/>
+                <field name="checkin_date"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'"
+                       decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'checked_in'"
+                       decoration-muted="state == 'checked_out'"/>
+                <field name="payment_state" widget="badge"
+                       decoration-warning="payment_state == 'partially_paid'"
+                       decoration-danger="payment_state == 'unpaid'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hotel_booking_search" model="ir.ui.view">
+        <field name="name">hotel.booking.search</field>
+        <field name="model">hotel.booking</field>
+        <field name="arch" type="xml">
+            <search string="Search Reservations">
+                <field name="name"/>
+                <field name="guest_id"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Today Stays" name="today_arrivals"
+                        domain="[('checkin_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_booking" model="ir.actions.act_window">
+        <field name="name">Reservations</field>
+        <field name="res_model">hotel.booking</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

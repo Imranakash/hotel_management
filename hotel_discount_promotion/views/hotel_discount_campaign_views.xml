@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_hotel_discount_campaign_tree" model="ir.ui.view">
+            <field name="name">hotel.discount.campaign.list</field>
+            <field name="model">hotel.discount.campaign</field>
+            <field name="arch" type="xml">
+                <list string="Promo Campaigns &amp; Coupons">
+                    <field name="name"/>
+                    <field name="code" widget="badge" decoration-success="campaign_type == 'promo'"/>
+                    <field name="campaign_type"/>
+                    <field name="discount_method"/>
+                    <field name="discount_value"/>
+                    <field name="valid_from"/>
+                    <field name="valid_to"/>
+                    <field name="current_usage"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_hotel_discount_campaign_form" model="ir.ui.view">
+            <field name="name">hotel.discount.campaign.form</field>
+            <field name="model">hotel.discount.campaign</field>
+            <field name="arch" type="xml">
+                <form string="Discount Campaign">
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1><field name="name" placeholder="e.g. Eid-Ul-Fitr 20% Discount"/></h1>
+                        </div>
+                        <group>
+                            <group string="Campaign Settings">
+                                <field name="code"/>
+                                <field name="campaign_type"/>
+                                <field name="active"/>
+                            </group>
+                            <group string="Discount Configuration">
+                                <field name="discount_method"/>
+                                <field name="discount_value"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Validity Period">
+                                <field name="valid_from"/>
+                                <field name="valid_to"/>
+                            </group>
+                            <group string="Usage Tracker">
+                                <field name="max_usage"/>
+                                <field name="current_usage"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <chatter>
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </chatter>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_hotel_discount_campaign" model="ir.actions.act_window">
+            <field name="name">Promo &amp; Coupons</field>
+            <field name="res_model">hotel.discount.campaign</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem id="menu_hotel_discount_campaign"
+                  name="Discounts &amp; Coupons"
+                  parent="hotel_management_core.menu_hotel_configuration"
+                  action="action_hotel_discount_campaign"
+                  sequence="50"/>
+    </data>
+</odoo>

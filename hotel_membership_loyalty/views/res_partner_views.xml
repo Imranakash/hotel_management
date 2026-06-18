@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_tree_inherit_loyalty" model="ir.ui.view">
+        <field name="name">res.partner.list.inherit.loyalty</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='phone']" position="after">
+                <field name="membership_card_no" optional="show"/>
+                <field name="loyalty_points_balance" string="Loyalty Points" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="view_partner_form_inherit_loyalty" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.loyalty</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="VIP &amp; Loyalty Profile" name="loyalty_profile">
+                    <group>
+                        <group string="Card Information">
+
+                            <field name="membership_card_no" readonly="1" force_save="1"/>
+                            <field name="membership_tier_id" readonly="1" force_save="1"/>
+                        </group>
+                        <group string="Points Summary">
+                            <field name="loyalty_points_balance"/>
+                            <field name="total_points_earned"/>
+                        </group>
+                    </group>
+
+                    <separator string="Transaction History"/>
+
+                    <field name="loyalty_history_ids" nolabel="1">
+                        <list editable="bottom">
+                            <field name="date"/>
+                            <field name="transaction_type"/>
+                            <field name="points"/>
+                            <field name="redemption_type" optional="show"/>
+                            <field name="description"/>
+
+                            <field name="partner_id" column_invisible="True"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
