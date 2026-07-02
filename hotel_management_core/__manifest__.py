@@ -1,0 +1,27 @@
+{
+ 'name': 'Hotel Management Core',
+ 'category': 'Hotel Management',
+ 'version': '19.0.1.0.0',
+ 'depends': ['base', 'mail', 'contacts', 'product', 'uom','account'],
+ 'data': [
+ # 'reports/registration_card_report.xml'
+ 'security/hotel_security.xml',
+ 'security/ir.model.access.csv',
+ 'data/ir_sequence.xml',
+ 'views/hotel_property_views.xml',
+ 'views/hotel_room_views.xml',
+ 'views/hotel_room_rate_views.xml',
+ 'views/hotel_booking_views.xml',
+ 'views/hotel_config_views.xml',
+ 'views/hotel_dashboard.xml',
+ 'views/hotel_folio_views.xml',
+ 'views/hotel_guest_views.xml',
+ 'views/hotel_menus.xml',
+ 'reports/registration_card_report.xml',
+ 'reports/folio_bill_report.xml',
+ 'wizards/room_move_wizard_views.xml',
+ 'wizards/hotel_booking_approval_wizard_view.xml',
+ ],
+ 'application': True,
+ 'installable': True,
+}

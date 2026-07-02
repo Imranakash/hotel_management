@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hotel_room_rate_list" model="ir.ui.view">
+        <field name="name">hotel.room.rate.list</field>
+        <field name="model">hotel.room.rate</field>
+        <field name="arch" type="xml">
+            <list string="Room Rates Configuration" editable="bottom" >
+                <field name="property_id"/>
+                <field name="room_type_id"
+                       domain="[('room_ids.property_id', '=', property_id)]"
+                       options="{'no_create': True, 'no_open': True}"/>
+                <field name="fixed_rate" width="120px"/>
+                <field name="max_discount" width="150px" class="ps-5"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hotel_room_rate" model="ir.actions.act_window">
+        <field name="name">Room Rates Setup</field>
+        <field name="res_model">hotel.room.rate</field>
+        <field name="view_mode">list</field>
+    </record>
+
+<!--    <menuitem id="menu_hotel_room_rate"-->
+<!--              name="Room Rates Setup"-->
+<!--              parent="hotel_management_core.menu_hotel_configuration"-->
+<!--              action="action_hotel_room_rate"-->
+<!--              sequence="25"/>-->
+</odoo>

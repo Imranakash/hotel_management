@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_hotel_guest" model="ir.ui.view">
+        <field name="name">res.partner.form.hotel.guest</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_guest_bookings"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-calendar"
+                        invisible="not is_hotel_guest">
+                    <field name="booking_count" widget="statinfo" string="Bookings"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//sheet" position="inside">
+                <widget name="web_ribbon" title="⚠️ BLACKLISTED" bg_color="text-bg-danger" invisible="not is_blacklisted_guest"/>
+            </xpath>
+
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="is_hotel_guest" widget="boolean_toggle"/>
+            </xpath>
+
+            <xpath expr="//group[1]" position="after">
+                <group name="hospitality_profile" invisible="not is_hotel_guest" col="4">
+                    <group string="IDENTIFICATION" colspan="2">
+                        <field name="id_type" required="is_hotel_guest"/>
+                        <field name="id_number" required="is_hotel_guest"/>
+                        <field name="nationality_id"/>
+                    </group>
+
+                    <group string="LOYALTY &amp; STATUS" colspan="2">
+                        <field name="vip_tier" widget="badge" decoration-warning="vip_tier == 'gold'" decoration-success="vip_tier == 'platinum'" decoration-info="vip_tier == 'silver'"/>
+                        <field name="is_blacklisted_guest" widget="boolean_toggle"/>
+                        <field name="blacklist_reason" invisible="not is_blacklisted_guest" required="is_blacklisted_guest" placeholder="Provide a valid security reason..."/>
+                    </group>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="action_hotel_guest" model="ir.actions.act_window">
+        <field name="name">Guest Profiles</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_hotel_guest', '=', True)]</field>
+        <field name="context">{'default_is_hotel_guest': True}</field>
+    </record>
+</odoo>

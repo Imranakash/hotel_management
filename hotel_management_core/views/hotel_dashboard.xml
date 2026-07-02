@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_hotel_booking_simple_popup" model="ir.ui.view">
+            <field name="name">hotel.booking.simple.popup</field>
+            <field name="model">hotel.booking</field>
+            <field name="arch" type="xml">
+                <form string="Booking Details" create="0" edit="0" delete="0">
+                    <sheet>
+                        <div class="text-center mb-4">
+                            <h3 class="text-primary fw-bold">Active Reservation Details</h3>
+                        </div>
+                        <group id="key_details_group">
+                            <group id="left_details">
+                                <field name="guest_id" string="Primary Guest" readonly="1" options="{'no_open': True}"/>
+                                <field name="booking_date" string="Booking Date" readonly="1"/>
+                            </group>
+                            <group id="right_details">
+                                <field name="checkin_date" string="Arrival Date &amp; Time" readonly="1"/>
+                                <field name="checkout_date" string="Departure Date &amp; Time" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string="Close" class="btn-secondary rounded-pill" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_hotel_room_dashboard_kanban_v5" model="ir.ui.view">
+            <field name="name">hotel.room.dashboard.kanban.v5</field>
+            <field name="model">hotel.room</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="status" class="o_kanban_small_column" create="0" edit="0" quick_create="0">
+                    <field name="room_number"/>
+                    <field name="room_type_id"/>
+                    <field name="property_id"/>
+                    <field name="status"/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_global_click p-0 mb-3 rounded-3 bg-white overflow-hidden"
+                                 t-attf-style="border: 1px solid #e0e0e0; border-left: 6px solid #{
+                                    record.status.raw_value == 'available' ? '28a745' :
+                                    record.status.raw_value == 'occupied' ? 'dc3545' :
+                                    record.status.raw_value == 'reserved' ? 'ffc107' :
+                                    record.status.raw_value == 'maintenance' ? '17a2b8' : '6c757d'} !important;
+                                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+
+                                <div class="p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-uppercase fw-bold text-dark opacity-75" style="font-size: 11px; letter-spacing: 0.5px;">
+                                            <i class="fa fa-building me-1 text-primary"/> <field name="property_id"/>
+                                        </span>
+                                    </div>
+
+                                    <div class="my-2">
+                                        <h3 class="fw-black mb-0 text-dark" style="font-size: 20px; font-weight: 800;">
+                                            <i class="fa fa-bed text-primary me-2"/>
+                                            Room <field name="room_number"/>
+                                        </h3>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top" style="border-top-color: #f1f1f1 !important;">
+                                        <span class="text-dark fw-bold" style="font-size: 13px; opacity: 0.9;">
+                                            <field name="room_type_id"/>
+                                        </span>
+
+                                        <span t-attf-class="badge rounded-pill px-2 py-1 text-uppercase fw-bold #{
+                                            record.status.raw_value == 'available' ? 'bg-success text-white' :
+                                            record.status.raw_value == 'occupied' ? 'bg-danger text-white' :
+                                            record.status.raw_value == 'reserved' ? 'bg-warning text-dark' :
+                                            record.status.raw_value == 'maintenance' ? 'bg-info text-white' : 'bg-secondary text-white'}"
+                                              style="font-size: 10px; letter-spacing: 0.5px;">
+                                            <field name="status"/>
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-3 text-end">
+                                        <t t-if="record.status.raw_value == 'available'">
+                                            <button name="action_dashboard_book_room" type="object"
+                                                    class="btn btn-sm btn-success fw-bold w-100 rounded-3 py-2 text-white shadow-sm"
+                                                    style="font-size: 12px; border: none;">
+                                                <i class="fa fa-calendar-plus-o me-1"/> Book Now
+                                            </button>
+                                        </t>
+
+                                        <t t-if="record.status.raw_value == 'reserved' or record.status.raw_value == 'occupied'">
+                                            <button name="action_dashboard_see_details" type="object"
+                                                    class="btn btn-sm btn-primary fw-bold w-100 rounded-3 py-2 text-white shadow-sm"
+                                                    style="font-size: 12px; border: none;">
+                                                <i class="fa fa-info-circle me-1"/> See Details
+                                            </button>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_hotel_room_dashboard_kanban_action_v5" model="ir.actions.act_window">
+            <field name="name">Live Dashboard</field>
+            <field name="res_model">hotel.room</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="view_id" ref="view_hotel_room_dashboard_kanban_v5"/>
+            <field name="context">{}</field>
+        </record>
+
+    </data>
+</odoo>

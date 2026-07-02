@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hotel_building_form" model="ir.ui.view">
+        <field name="name">hotel.building.form</field>
+        <field name="model">hotel.building</field>
+        <field name="arch" type="xml">
+            <form string="Building">
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="e.g. Tower A, North Wing"/>
+                        <field name="property_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_room_type_form" model="ir.ui.view">
+        <field name="name">hotel.room.type.form</field>
+        <field name="model">hotel.room.type</field>
+        <field name="arch" type="xml">
+            <form string="Room Category">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g. Deluxe Room, Suite"/>
+                        </group>
+                        <group>
+                            <field name="code" placeholder="e.g. DLX, SUT, STD"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_building_list" model="ir.ui.view">
+        <field name="name">hotel.building.list</field>
+        <field name="model">hotel.building</field>
+        <field name="arch" type="xml">
+            <list string="Buildings">
+                <field name="name"/>
+                <field name="property_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hotel_floor_form" model="ir.ui.view">
+        <field name="name">hotel.floor.form</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <form string="Floor">
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="e.g. 1st Floor, Ground Floor"/>
+                        <field name="building_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_floor_list" model="ir.ui.view">
+        <field name="name">hotel.floor.list</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <list string="Floors">
+                <field name="name"/>
+                <field name="building_id"/>
+            </list>
+        </field>
+    </record>
+</odoo>

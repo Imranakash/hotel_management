@@ -1,0 +1,28 @@
+<odoo>
+
+    <menuitem id="menu_hotel_frontdesk_config_root"
+              name="Hotel FrontDesk"
+              parent="hotel_management_core.menu_hotel_configuration"
+              sequence="100"
+              groups="hotel_management_core.group_hotel_frontdesk_officer"/>
+
+
+    <menuitem id="menu_hotel_frontdesk_booking"
+              name="Reservations / Bookings"
+              parent="menu_hotel_frontdesk_config_root"
+              action="hotel_management_core.action_hotel_booking"
+              sequence="10"/>
+
+
+    <menuitem id="menu_hotel_frontdesk_rooms"
+              name="Room Assignment"
+              parent="menu_hotel_frontdesk_config_root"
+              action="hotel_management_core.action_hotel_room"
+              sequence="20"/>
+
+    <menuitem id="menu_hotel_frontdesk_folios"
+              name="Guest Folios"
+              parent="menu_hotel_frontdesk_config_root"
+              action="hotel_management_core.action_hotel_folio"
+              sequence="30"/>
+</odoo>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hotel_property_form" model="ir.ui.view">
+        <field name="name">hotel.property.form</field>
+        <field name="model">hotel.property</field>
+        <field name="arch" type="xml">
+            <form string="Hotel/Resort Property">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_room_dashboard" type="object" class="oe_stat_button" icon="oi-apps">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Room Status</span>
+                            </div>
+                        </button>
+                        <button name="action_open_today_arrivals" type="object" class="oe_stat_button" icon="fa-calendar-check-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Today Arrivals</span>
+                            </div>
+                        </button>
+                        <button name="action_open_today_departures" type="object" class="oe_stat_button" icon="fa-sign-out">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Today Departures</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Property Name"/>
+                        <h1><field name="name" placeholder="e.g. Grand Resort &amp; Spa"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Configuration">
+                            <field name="code" placeholder="e.g. GMRS"/>
+                            <field name="property_type"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Operational Policy">
+                            <field name="default_checkin_time" widget="float_time"/>
+                            <field name="default_checkout_time" widget="float_time"/>
+                            <field name="currency_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+<chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_property_tree" model="ir.ui.view">
+        <field name="name">hotel.property.tree</field>
+        <field name="model">hotel.property</field>
+        <field name="arch" type="xml">
+            <list string="Hotel Properties">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="property_type"/>
+                <field name="default_checkin_time" widget="float_time"/>
+                <field name="default_checkout_time" widget="float_time"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hotel_property" model="ir.actions.act_window">
+        <field name="name">Hotels &amp; Resorts</field>
+        <field name="res_model">hotel.property</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first Hotel property!</p>
+        </field>
+    </record>
+</odoo>
