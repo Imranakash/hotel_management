@@ -24,3 +24,9 @@ access_hotel_room_move_wizard,hotel.room.move.wizard,model_hotel_room_move_wizar
 access_hotel_dashboard,hotel.dashboard,model_hotel_dashboard,base.group_user,1,1,1,1
 access_hotel_room_rate_admin,access.hotel.room.rate.admin,model_hotel_room_rate,base.group_user,1,1,1,1
 access_hotel_booking_approval_wizard,hotel.booking.approval.wizard,model_hotel_booking_approval_wizard,base.group_user,1,1,1,1
+access_hotel_room_amenity_officer,hotel.room.amenity.officer,model_hotel_room_amenity,group_hotel_frontdesk_officer,1,1,1,0
+access_hotel_room_amenity_manager,hotel.room.amenity.manager,model_hotel_room_amenity,group_hotel_frontdesk_manager,1,1,1,1
+access_hotel_floor,hotel.floor,model_hotel_floor,base.group_user,1,1,1,1
+access_hotel_building,hotel.building,model_hotel_building,base.group_user,1,1,1,1
+access_hotel_checkin_wizard,hotel.checkin.wizard,model_hotel_checkin_wizard,base.group_user,1,1,1,1
+access_hotel_checkin_wizard_line,hotel.checkin.wizard.line,model_hotel_checkin_wizard_line,base.group_user,1,1,1,1

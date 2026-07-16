@@ -12,21 +12,30 @@
 
                     <group>
                         <group>
+                            <field name="filter_same_type"/>
                             <field name="current_room_id"/>
                             <field name="new_room_id"
                                    domain="room_domain"
                                    options="{'no_create': True, 'no_open': True}"/>
                         </group>
-                        <group>
+                        <group string="Reason">
                             <field name="reason"/>
                         </group>
                     </group>
-                    <footer>
-                        <button name="action_confirm_move" string="Confirm &amp; Move Room" type="object" class="btn-primary"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel"/>
-                    </footer>
-                </sheet>
-            </form>
-        </field>
-    </record>
-</odoo>
+
+                    <div invisible="not folio_impact_msg" class="w-100 clearfix">
+                        <div class="alert alert-info" role="alert"
+                             style="font-weight: bold; font-size: 14px; width: 100% !important; clear: both; display: block; margin-top: 15px;">
+                            <field name="folio_impact_msg" nolabel="1"/>
+                        </div>
+                    </div>
+
+            <footer>
+                <button name="action_confirm_move" string="Confirm &amp; Move Room" type="object" class="btn-primary"/>
+                <button string="Cancel" class="btn-secondary" special="cancel"/>
+            </footer>
+        </sheet>
+    </form>
+</field>
+        </record>
+        </odoo>

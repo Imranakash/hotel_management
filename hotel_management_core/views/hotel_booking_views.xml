@@ -6,11 +6,18 @@
         <field name="arch" type="xml">
             <form string="Reservation / Booking">
                 <header>
+
                     <button name="action_set_to_draft" string="Reset to Draft" type="object"
                             invisible="state not in ['confirmed', 'waiting_approval', 'cancelled']"/>
 
                     <button name="action_confirm" string="Confirm Booking" type="object" class="oe_highlight"
                             invisible="state != 'draft'"/>
+
+                    <button name="action_approve_discount" string="Approve Discount" type="object" class="btn-success"
+                            invisible="state != 'waiting_approval'"/>
+
+                    <button name="action_reject_discount" string="Reject Discount" type="object" class="btn-danger"
+                            invisible="state != 'waiting_approval'"/>
 
                     <button name="action_check_in" string="Check In Guest" type="object" class="oe_highlight"
                             invisible="state != 'confirmed'"/>
@@ -25,26 +32,19 @@
                             invisible="state in ['cancelled', 'checked_in', 'checked_out']"
                             confirm="Are you sure you want to cancel this booking?"/>
 
-                    <field name="state" widget="statusbar" statusbar_visible="draft,waiting_approval,confirmed,checked_in,checked_out"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,waiting_approval,confirmed,checked_in,checked_out"/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Credit Exceeded" bg_color="text-bg-danger"
                             invisible="is_credit_exceeded == False"/>
 
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_connected_folios" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                        <button name="action_view_connected_folios" type="object" class="oe_stat_button"
+                                icon="fa-file-text-o">
                             <field name="folio_count" widget="statinfo" string="Folios"/>
                         </button>
 
-                        <button name="action_open_approval_wizard" type="object" class="oe_stat_button" icon="fa-shield"
-                                invisible="approval_state == 'no_needed'">
-                            <div class="o_stat_info">
-                                <field name="approval_state" class="oe_bold" readonly="1"
-                                       decoration-danger="approval_state == 'waiting'"
-                                       decoration-success="approval_state == 'approved'"/>
-                                <span class="o_stat_text">Approval Desk</span>
-                            </div>
-                        </button>
                     </div>
 
                     <div class="oe_title">
@@ -56,13 +56,16 @@
                         <group string="Guest &amp; Property">
                             <field name="property_id" options="{'no_create': True}"/>
                             <field name="guest_id" context="{'default_is_hotel_guest': True}"/>
+                            <field name="guest_id_type" invisible="not guest_id" force_save="1"/>
+                            <field name="guest_id_number" invisible="not guest_id" force_save="1"/>
                             <field name="booking_source"/>
                             <field name="booking_date"/>
-                            <field name="checkin_date" string="Arrival Date &amp; Time"/>
-                            <field name="checkout_date" string="Departure Date &amp; Time"/>
+                            <field name="checkin_date" string="Arrival Date" options="{'min_date': 'today'}" />
+                            <field name="checkout_date" string="Departure Date" invisible="not checkin_date" options="{'datepicker': {'minDate': 'checkin_date'}}" context="{'default_checkout_date': checkout_date}"/>
                         </group>
                         <group string="Stay Dates">
                             <field name="deposit_amount" string="Advance Deposit Received"/>
+<!--                            <field name="package_id" options="{'no_create': True, 'no_open': True}"/>-->
                             <field name="discount_amount" string="Discount Amount" widget="monetary"
                                    invisible="state in ['checked_in', 'checked_out']"/>
                             <field name="payment_state" widget="badge"
@@ -71,7 +74,8 @@
                                    decoration-danger="payment_state == 'unpaid'"/>
                             <field name="agent_commission" invisible="booking_source not in ['ota', 'corporate']"
                                    readonly="state == 'cancelled'"/>
-                            <field name="is_credit_exceeded" invisible="booking_source != 'corporate'" class="text-danger oe_bold"/>
+                            <field name="is_credit_exceeded" invisible="booking_source != 'corporate'"
+                                   class="text-danger oe_bold"/>
                         </group>
                     </group>
                     <notebook>
@@ -81,28 +85,37 @@
                                     <field name="room_type_id"
                                            domain="[('room_ids.property_id', '=', parent.property_id)]"
                                            options="{'no_create': True, 'no_open': True}"/>
-                                    <field name="room_id" required="1" options="{'no_create': True}"
+<!--                                    <field name="room_id" required="1" options="{'no_create': True}"-->
                                            domain="[('property_id', '=', parent.property_id), ('room_type_id', '=', room_type_id), ('status', '=', 'available')]"/>
-                                    <field name="price_unit" force_save="1"/>
-                                    <field name="extra_bed_count"/>
+                                    <field name="price_unit" force_save="1" widget="monetary"/>
+                                    <field name="extra_bed_count" widget="integer"/>
                                 </list>
                             </field>
                         </page>
-                        <page string="Cancellation &amp; Refunds" name="cancellation_refunds" invisible="state != 'cancelled'">
+                        <page string="Cancellation &amp; Refunds" name="cancellation_refunds"
+                              invisible="state != 'cancelled'">
                             <group>
                                 <group string="Refund &amp; Penalty Settlement">
                                     <field name="cancellation_date" readonly="1"/>
                                     <field name="deposit_amount" readonly="1" string="Total Advance Deposit"/>
-                                    <field name="refund_amount" widget="monetary" readonly="1" class="text-success oe_bold" string="Amount to Refund"/>
-                                    <field name="forfeiture_amount" widget="monetary" readonly="1" class="text-danger oe_bold" string="Forfeiture (Penalty Fee)"/>
+                                    <field name="refund_amount" widget="monetary" readonly="1"
+                                           class="text-success oe_bold" string="Amount to Refund"/>
+                                    <field name="forfeiture_amount" widget="monetary" readonly="1"
+                                           class="text-danger oe_bold" string="Forfeiture (Penalty Fee)"/>
                                 </group>
-                                <group string="Channel/OTA Commission Reversal" invisible="booking_source not in ['ota', 'corporate']">
-                                    <field name="agent_commission" widget="monetary" readonly="1" string="Original Commission"/>
-                                    <field name="commission_status" widget="badge" decoration-danger="commission_status == 'reversed'" decoration-success="commission_status == 'active'" decoration-info="commission_status == 'na'"/>
+                                <group string="Channel/OTA Commission Reversal"
+                                       invisible="booking_source not in ['ota', 'corporate']">
+                                    <field name="agent_commission" widget="monetary" readonly="1"
+                                           string="Original Commission"/>
+                                    <field name="commission_status" widget="badge"
+                                           decoration-danger="commission_status == 'reversed'"
+                                           decoration-success="commission_status == 'active'"
+                                           decoration-info="commission_status == 'na'"/>
                                 </group>
                             </group>
                         </page>
-                        <page string="Room Move History" name="room_move_history" invisible="state not in ['checked_in', 'checked_out']">
+                        <page string="Room Move History" name="room_move_history"
+                              invisible="state not in ['checked_in', 'checked_out']">
                             <field name="room_move_ids">
                                 <list create="false" edit="false">
                                     <field name="move_datetime"/>
@@ -119,7 +132,8 @@
                                     <field name="folio_no" string="Folio Number"/>
                                     <field name="guest_id"/>
                                     <field name="amount_net_total" string="Total Charges" widget="monetary"/>
-                                    <field name="state" widget="badge" decoration-info="state == 'open'" decoration-success="state == 'billed'"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'open'"
+                                           decoration-success="state == 'billed'"/>
                                 </list>
                             </field>
                         </page>
@@ -139,8 +153,12 @@
                 <field name="guest_id"/>
                 <field name="property_id"/>
                 <field name="checkin_date"/>
-                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-warning="state == 'checked_in'" decoration-muted="state == 'checked_out'"/>
-                <field name="payment_state" widget="badge" decoration-success="payment_state == 'paid'" decoration-warning="payment_state == 'partially_paid'" decoration-danger="payment_state == 'unpaid'"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'"
+                       decoration-success="state == 'confirmed'" decoration-warning="state == 'checked_in'"
+                       decoration-muted="state == 'checked_out'"/>
+                <field name="payment_state" widget="badge" decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state == 'partially_paid'"
+                       decoration-danger="payment_state == 'unpaid'"/>
             </list>
         </field>
     </record>
@@ -153,7 +171,8 @@
                 <field name="name"/>
                 <field name="guest_id"/>
                 <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
-                <filter string="Today Stays" name="today_arrivals" domain="[('checkin_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Today Stays" name="today_arrivals"
+                        domain="[('checkin_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
             </search>
         </field>
     </record>

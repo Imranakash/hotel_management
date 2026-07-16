@@ -46,16 +46,18 @@ class HotelBooking(models.Model):
         readonly=True,
         tracking=True,
     )
-    checkin_date = fields.Datetime(
-        string='Arrival Date & Time',
+    checkin_date = fields.Date(
+        string='Arrival Date',
         required=True,
         tracking=True,
+        default=lambda self: fields.Date.context_today(self),
         help="Expected or actual check-in time."
     )
-    checkout_date = fields.Datetime(
-        string='Departure Date & Time',
+    checkout_date = fields.Date(
+        string='Departure Date',
         required=True,
         tracking=True,
+        default=lambda self: fields.Date.context_today(self),
         help="Expected or actual check-out time."
     )
     duration_days = fields.Integer(
@@ -146,6 +148,47 @@ class HotelBooking(models.Model):
     ], string='Commission Status', default='na', tracking=True, copy=False)
 
     booking_count = fields.Integer(string="Booking Count", compute="_compute_booking_count")
+    guest_id_type = fields.Selection([
+        ('nid', 'National ID (NID)'),
+        ('passport', 'Passport'),
+        ('driving', 'Driving License')
+    ], string='Identification Type', required=True, tracking=True)
+
+    guest_id_number = fields.Char(string='ID / Document Number', required=True, tracking=True)
+
+    @api.onchange('checkin_date')
+    def _onchange_checkin_date_update_checkout(self):
+        if self.checkin_date:
+            if not self.checkout_date or self.checkout_date <= self.checkin_date:
+                self.checkout_date = self.checkin_date
+
+    @api.onchange('manual_discount_value', 'manual_discount_type')
+    def _onchange_manual_discount_calc(self):
+        for record in self:
+            if hasattr(record, 'manual_discount_value'):
+                record.discount_amount = record.manual_discount_value
+
+
+    @api.onchange('guest_id')
+    def _onchange_guest_id_fetch_id_details(self):
+        for record in self:
+            if record.guest_id:
+                if record.guest_id.id_type:
+                    record.guest_id_type = record.guest_id.id_type
+                if record.guest_id.id_number:
+                    record.guest_id_number = record.guest_id.id_number
+
+    @api.onchange('guest_id_type', 'guest_id_number')
+    def _onchange_write_back_to_guest_profile(self):
+        for record in self:
+            if record.guest_id:
+                vals = {}
+                if record.guest_id_type:
+                    vals['id_type'] = record.guest_id_type
+                if record.guest_id_number:
+                    vals['id_number'] = record.guest_id_number
+                if vals:
+                    record.guest_id.write(vals)
 
 
     @api.depends('room_line_ids.price_unit', 'room_line_ids.extra_bed_count', 'duration_days')
@@ -159,7 +202,6 @@ class HotelBooking(models.Model):
 
     @api.depends('folio_ids', 'folio_ids.invoice_ids', 'folio_ids.invoice_ids.payment_state', 'deposit_amount', 'state')
     def _compute_payment_state(self):
-        """ফোলিও এবং ইনভয়েসের পেমেন্ট স্ট্যাটাস ডাইনামিকালি ক্যালকুলেট করার লজিক"""
         for record in self:
             all_invoices = record.folio_ids.mapped('invoice_ids')
 
@@ -204,10 +246,11 @@ class HotelBooking(models.Model):
                 if record.checkout_date <= record.checkin_date:
                     raise ValidationError(
                         _("Error! Departure (Check-Out) date must be strictly after the Arrival (Check-In) date."))
-                if record.checkin_date.date() < fields.Date.today():
-                    if record.state == 'draft':
-                        continue
-                    raise ValidationError(_("Warning: Cannot confirm a booking with an arrival date in the past."))
+
+                today_date = fields.Date.context_today(self)
+                if record.checkin_date < today_date:
+                    raise ValidationError(
+                        _("Business Rule Violation: Arrival (Check-In) date cannot be set in the past!"))
 
     @api.depends('checkin_date', 'checkout_date')
     def _compute_duration_days(self):
@@ -316,6 +359,7 @@ class HotelBooking(models.Model):
                                 'Discount exceeds your allowed limit! Booking has been sent to the Manager for approval.'),
                             'sticky': False,
                             'type': 'warning',
+                            'next': {'type': 'ir.actions.client', 'tag': 'reload'},
                         }
                 }
 
@@ -380,7 +424,7 @@ class HotelBooking(models.Model):
             record.message_post(body=_("<b>Approval Rejected:</b> Resetting booking parameters to Draft."))
         return True
 
-    def action_check_in(self):
+    def action_actual_check_in(self):
         self.flush_recordset()
 
         for record in self:
@@ -427,12 +471,38 @@ class HotelBooking(models.Model):
 
         return True
 
+    def action_check_in(self):
+        self.ensure_one()
+        if self.state != 'confirmed':
+            return False
+
+        wizard_lines = []
+        for line in self.room_line_ids:
+            wizard_lines.append((0, 0, {
+                'room_type_id': line.room_type_id.id,
+            }))
+
+        wizard = self.env['hotel.checkin.wizard'].create({
+            'booking_id': self.id,
+            'property_id': self.property_id.id,
+            'line_ids': wizard_lines,
+        })
+
+        return {
+            'name': _('Select Available Rooms for Check-In'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'hotel.checkin.wizard',
+            'view_mode': 'form',
+            'res_id': wizard.id,
+            'target': 'new',
+        }
+
     def action_check_out(self):
         for record in self:
             if record.state != 'checked_in':
                 raise UserError(_("Only Checked-In bookings can be checked out."))
 
-            if record.checkout_date and fields.Datetime.now() > record.checkout_date:
+            if record.checkout_date and fields.Date.context_today(self) > record.checkout_date:
                 raise UserError(_(
                     "🛑 System Blocked: Expected Departure Time (%s) has already passed!\n\n"
                     "This guest has overstayed. You cannot perform a standard check-out.\n"
@@ -448,13 +518,18 @@ class HotelBooking(models.Model):
             if not folio:
                 raise UserError(_("No active open Folio found for this booking. Cannot proceed with checkout."))
 
-
             if folio.state != 'paid':
-                raise UserError(_(
-                    "🛑 Checkout Blocked: Folio is not cleared yet!\n\n"
-                    "The guest still has unpaid balances or the folio is not marked as Paid.\n"
-                    "Please process the final payment and mark the folio as PAID before completing checkout."
-                ))
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _("⚠️ Folio Clearance Required"),
+                        'message': _(
+                            "Checkout is blocked because the folio is not cleared yet. Please process the final payment and mark it as PAID."),
+                        'sticky': True,
+                        'type': 'warning',
+                    }
+                }
 
 
             for line in record.room_line_ids:
@@ -556,6 +631,27 @@ class HotelBooking(models.Model):
             return super(HotelBooking, self).write(vals)
 
         for record in self:
+            discount = vals.get('discount_amount', record.discount_amount)
+            new_state = vals.get('state', record.state)
+
+            if discount > 0 and not record.is_approved and new_state in ['confirmed', 'checked_in']:
+                allowed_max_discount = 0.0
+                for line in record.room_line_ids:
+                    if line.room_type_id and record.property_id:
+                        rate_setup = self.env['hotel.room.rate'].search([
+                            ('property_id', '=', record.property_id.id),
+                            ('room_type_id', '=', line.room_type_id.id)
+                        ], limit=1)
+                        if rate_setup:
+                            allowed_max_discount = rate_setup.max_discount
+                            break
+
+                if discount > allowed_max_discount:
+                    raise UserError(
+                        _("🛑 Security Block: Discount amount (%s) exceeds the allowed limit (%s)! This booking requires Manager Approval.")
+                        % (discount, allowed_max_discount)
+                    )
+
             is_manager = self.env.user.has_group('hotel_management_core.group_hotel_manager')
             if record.state in ['confirmed', 'checked_in', 'checked_out'] and not is_manager:
                 if 'state' in vals and vals['state'] in ['draft', 'cancelled']:
@@ -577,22 +673,77 @@ class HotelBooking(models.Model):
                     _("Security Block: You cannot delete a booking that is confirmed, active, or waiting for approval! Please cancel it first."))
         return super(HotelBooking, self).unlink()
 
+
     def action_move_room(self, new_room_id, reason="AC / Maintenance Issue"):
         self.ensure_one()
 
         if self.state != 'checked_in':
             raise UserError(_("Guest must be 'Checked In' to move rooms!"))
+
         room_line = self.room_line_ids and self.room_line_ids[0]
         if not room_line:
             raise UserError(_("No room is currently allocated to this booking!"))
+
         old_room = room_line.room_id
         new_room = self.env['hotel.room'].browse(new_room_id)
 
         if not new_room or new_room.status != 'available':
             raise UserError(_("The selected new room is not available!"))
-        room_line.write({'room_id': new_room.id})
+
+        today = fields.Date.today()
+        checkout_date = fields.Date.to_date(self.checkout_date)
+        remaining_nights = (checkout_date - today).days
+        if remaining_nights <= 0:
+            remaining_nights = 1
+
+        new_rate_record = self.env['hotel.room.rate'].search([
+            ('property_id', '=', self.property_id.id),
+            ('room_type_id', '=', new_room.room_type_id.id)
+        ], limit=1)
+
+        new_price = new_rate_record.fixed_rate if new_rate_record else 0.0
+
+        folio = self.env['hotel.folio'].search([
+            ('booking_id', '=', self.id),
+            ('state', 'not in', ['cancel'])
+        ], limit=1)
+
+        if folio:
+            price_difference = new_price - room_line.price_unit
+            total_adjustment = price_difference * remaining_nights
+            if total_adjustment != 0:
+                service_product = self.env['product.product'].search([
+                    ('name', 'ilike', 'Room'),
+                    ('type', '=', 'service')
+                ], limit=1)
+
+                if not service_product and room_line.product_id:
+                    service_product = room_line.product_id
+
+                if not service_product:
+                    service_product = self.env['product.product'].search([('type', '=', 'service')], limit=1)
+
+                name_msg = _("🔄 Room Move Adjustment: Room %s to %s (%s Nights) - Reason: %s") % (
+                    old_room.name, new_room.name, remaining_nights, reason)
+
+                self.env['hotel.folio.line'].create({
+                    'folio_id': folio.id,
+                    'product_id': service_product.id if service_product else False,
+                    'name': name_msg,
+                    'price_unit': price_difference,
+                    'quantity': remaining_nights,
+                })
+
+
+
+        room_line.write({
+            'room_id': new_room.id,
+            'price_unit': new_price if new_price > 0 else room_line.price_unit
+        })
+
         new_room.write({'status': 'occupied'})
         old_room.write({'status': 'maintenance'})
+
         self.env['hotel.room.maintenance'].create({
             'room_id': old_room.id,
             'booking_id': self.id,
@@ -612,18 +763,45 @@ class HotelBooking(models.Model):
         })
 
         self.message_post(body=f"🔄 Room Moved: {old_room.name} ➡️ {new_room.name}. Reason: {reason}")
-        return True
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Room Moved Successfully"),
+                'message': _("Guest shifted to Room %s. Folio adjusted automatically.") % new_room.name,
+                'sticky': False,
+                'type': 'success',
+                'next': {
+                    'type': 'ir.actions.client',
+                    'tag': 'reload',
+                }
+            }
+        }
+
+
 
     def button_trigger_room_move_test(self):
         self.ensure_one()
+
+        ctx = dict(self.env.context)
+
+        room_line = self.room_line_ids and self.room_line_ids[0]
+        current_room = room_line.room_id if room_line else False
+        ctx.update({
+            'default_current_room_id': current_room.id if current_room else False,
+            'filter_room_category_id': current_room.room_type_id.id if current_room and current_room.room_type_id else False,
+        })
+
         return {
             'name': '🔄 Move Guest Room',
             'type': 'ir.actions.act_window',
             'res_model': 'hotel.room.move.wizard',
             'view_mode': 'form',
             'target': 'new',
-            'context': self.env.context,
+            'context': ctx,
         }
+
 
     folio_count = fields.Integer(string="Folio Count", compute="_compute_folio_count")
 
@@ -741,12 +919,12 @@ class HotelBookingRoomLine(models.Model):
 
         return {'domain': {'room_id': domain}}
 
-    @api.onchange('room_id')
+    @api.onchange('room_type_id')
     def _onchange_room_id_fetch_combined_price(self):
-        if self.room_id and self.booking_id.property_id:
+        if self.room_type_id and self.booking_id.property_id:
             rate_record = self.env['hotel.room.rate'].search([
                 ('property_id', '=', self.booking_id.property_id.id),
-                ('room_type_id', '=', self.room_id.room_type_id.id)
+                ('room_type_id', '=', self.room_type_id.id)
             ], limit=1)
 
             if rate_record:

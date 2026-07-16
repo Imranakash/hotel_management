@@ -19,9 +19,21 @@ class HotelBuilding(models.Model):
     active = fields.Boolean(string='Active', default=True)
 
     _sql_constraints = [
-        ('unique_building_code_per_property', 'unique(code, property_id)',
-         'The building code must be unique per property/hotel!')
+        ('unique_building_name_per_property_final', 'unique(name, property_id)',
+         'The building name must be unique per property/hotel!')
     ]
+
+    @api.constrains('name', 'property_id')
+    def _check_unique_building_name(self):
+        for record in self:
+            domain = [
+                ('name', '=ilike', record.name),
+                ('property_id', '=', record.property_id.id),
+                ('id', '!=', record.id)
+            ]
+            duplicate = self.search(domain, limit=1)
+            if duplicate:
+                raise ValidationError('The building name must be unique per property/hotel! (Python Validation)')
 
 
 class HotelFloor(models.Model):
@@ -44,6 +56,31 @@ class HotelFloor(models.Model):
     )
     sequence = fields.Integer(string='Sequence', default=10)
     active = fields.Boolean(string='Active', default=True)
+
+    @api.constrains('name', 'building_id', 'property_id')
+    def _check_unique_floor_name(self):
+        for record in self:
+            domain = [
+                ('name', '=ilike', record.name),
+                ('property_id', '=', record.property_id.id),
+                ('id', '!=', record.id)
+            ]
+
+            if record.building_id:
+                domain.append(('building_id', '=', record.building_id.id))
+            else:
+                domain.append(('building_id', '=', False))
+
+            duplicate = self.search(domain, limit=1)
+            if duplicate:
+                if record.building_id:
+                    raise ValidationError(
+                        f"The floor '{record.name}' already exists in the building '{record.building_id.name}'!"
+                    )
+                else:
+                    raise ValidationError(
+                        f"The floor '{record.name}' already exists in this property!"
+                    )
 
 
 class HotelZone(models.Model):
@@ -79,6 +116,31 @@ class HotelRoomType(models.Model):
 
     allow_extra_bed = fields.Boolean(string='Allow Extra Bed', default=True, tracking=True)
     max_extra_beds = fields.Integer(string='Max Extra Beds Allowed', default=1, tracking=True)
+
+    bed_type = fields.Selection([
+        ('single', 'Single x 1'),
+        ('double', 'Double x 1'),
+        ('king', 'KING x 1'),
+        ('twin', 'Twin x 2'),
+    ], string='Bed Type', default='king', tracking=True)
+
+    view_type = fields.Selection([
+        ('city', 'City View'),
+        ('sea', 'Sea View'),
+        ('pool', 'Pool View'),
+        ('hill', 'Hill View'),
+    ], string='View Type', default='city', tracking=True)
+
+    room_area = fields.Char(string='Area', default='24 sqm', help="e.g., 24 sqm, 250 sqft")
+
+    amenity_ids = fields.Many2many(
+        'hotel.room.amenity',
+        'hotel_room_type_amenity_rel',
+        'room_type_id',
+        'amenity_id',
+        string='Amenities',
+        help="Non-smoking rooms, Room service, Slippers, Safe, Toiletries, etc."
+    )
 
     description = fields.Text(string='Description / Features')
     active = fields.Boolean(string='Active', default=True)

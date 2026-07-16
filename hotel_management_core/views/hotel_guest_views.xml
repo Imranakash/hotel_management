@@ -24,11 +24,15 @@
                 <field name="is_hotel_guest" widget="boolean_toggle"/>
             </xpath>
 
+            <xpath expr="//field[@name='phone']" position="attributes">
+                <attribute name="required">is_hotel_guest</attribute>
+            </xpath>
+
             <xpath expr="//group[1]" position="after">
                 <group name="hospitality_profile" invisible="not is_hotel_guest" col="4">
                     <group string="IDENTIFICATION" colspan="2">
-                        <field name="id_type" required="is_hotel_guest"/>
-                        <field name="id_number" required="is_hotel_guest"/>
+                        <field name="id_type" />
+                        <field name="id_number" />
                         <field name="nationality_id"/>
                     </group>
 

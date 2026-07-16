@@ -23,10 +23,16 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="room_number"/>
-                        <field name="property_id"/>
-                        <field name="room_type_id"/>
-                        <field name="status"/>
+                        <group string="Basic Information">
+                            <field name="room_number"/>
+                            <field name="property_id"/>
+                            <field name="room_type_id"/>
+                            <field name="status"/>
+                        </group>
+                        <group string="Location Details">
+                            <field name="building_id"/>
+                            <field name="floor_id"/>
+                        </group>
                     </group>
                 </sheet>
                 <chatter/>
@@ -40,26 +46,92 @@
         <field name="arch" type="xml">
             <list string="Hotel Rooms">
                 <field name="room_number"/>
+                <field name="room_type_id"/>
                 <field name="property_id"/>
-                <field name="status"/>
+                <field name="building_id" optional="show"/>
+                <field name="floor_id" optional="show"/>
+                <field name="status"
+                       widget="badge"
+                       decoration-danger="status == 'dirty'"
+                       decoration-warning="status == 'clean'"
+                       decoration-success="status == 'available'"/>
             </list>
         </field>
     </record>
 
     <record id="view_hotel_room_search" model="ir.ui.view">
-        <field name="name">hotel.room.search</field>
-        <field name="model">hotel.room</field>
-        <field name="arch" type="xml">
-            <search string="Search Rooms">
-                <field name="room_number"/>
-            </search>
-        </field>
-    </record>
+    <field name="name">hotel.room.search</field>
+    <field name="model">hotel.room</field>
+    <field name="arch" type="xml">
+        <search string="Search Rooms">
+            <field name="room_number"/>
+            <field name="property_id"/>
+            <field name="room_type_id"/>
+            <field name="building_id"/>
+            <filter string="Available Rooms" name="filter_available" domain="[('status', '=', 'available')]"/>
+            <filter string="Dirty/Housekeeping Required" name="filter_dirty" domain="[('status', '=', 'dirty')]"/>
+            <filter string="Clean (Need Inspection)" name="filter_clean" domain="[('status', '=', 'clean')]"/>
+            <filter string="Under Maintenance" name="filter_maintenance" domain="[('status', '=', 'maintenance')]"/>
+            <separator/>
+            <filter string="Active Operational" name="filter_op_active"
+                    domain="[('operational_status', '=', 'active')]"/>
+
+        </search>
+    </field>
+</record>
 
     <record id="action_hotel_room" model="ir.actions.act_window">
         <field name="name">Rooms</field>
         <field name="res_model">hotel.room</field>
         <field name="view_mode">list,form</field>
     </record>
+
+    <record id="action_hotel_building" model="ir.actions.act_window">
+        <field name="name">Buildings</field>
+        <field name="res_model">hotel.building</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_hotel_floor_list_real" model="ir.ui.view">
+        <field name="name">hotel.floor.list.real</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <list string="Floors">
+                <field name="name"/>
+                <field name="building_id"/>
+                <field name="property_id" string="Parent Property"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hotel_floor_form_real" model="ir.ui.view">
+        <field name="name">hotel.floor.form.real</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <form string="Floor">
+                <sheet>
+                    <group>
+                        <group string="Floor Info">
+                            <field name="name"/>
+                            <field name="property_id"/>
+                        </group>
+                        <group string="Location Info">
+                            <field name="building_id" options="{'no_quick_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hotel_floor" model="ir.actions.act_window">
+        <field name="name">Floors</field>
+        <field name="res_model">hotel.floor</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_hotel_floor_list_real')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_hotel_floor_form_real')})]"/>
+    </record>
+
 
 </odoo>

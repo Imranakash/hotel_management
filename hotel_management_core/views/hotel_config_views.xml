@@ -21,14 +21,58 @@
         <field name="arch" type="xml">
             <form string="Room Category">
                 <sheet>
+                    <!-- প্রধান তথ্য -->
+                    <div class="oe_title">
+                        <label for="name" string="Room Type Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Deluxe Couple Room, Suite"/>
+                        </h1>
+                    </div>
+
                     <group>
-                        <group>
-                            <field name="name" placeholder="e.g. Deluxe Room, Suite"/>
-                        </group>
                         <group>
                             <field name="code" placeholder="e.g. DLX, SUT, STD"/>
                         </group>
                     </group>
+
+                    <notebook>
+                        <page string="Capacity &amp; Policies" name="capacity_policies">
+                            <group>
+                                <group string="Capacity Setup">
+                                    <field name="base_adults"/>
+                                    <field name="base_children"/>
+                                    <field name="max_capacity"/>
+                                </group>
+                                <group string="Extra Bed Policy">
+                                    <field name="allow_extra_bed" widget="boolean_toggle"/>
+                                    <field name="max_extra_beds" invisible="not allow_extra_bed"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Specifications &amp; Amenities" name="specifications_amenities">
+                            <group>
+                                <group string="ROOM SPECIFICATIONS">
+                                    <field name="bed_type"/>
+                                    <field name="view_type"/>
+                                    <field name="room_area"/>
+                                </group>
+
+                                <!-- ডানপাশে: এমেনিটিজ ট্যাগস -->
+                                <group string="ROOM AMENITIES">
+                                    <field name="amenity_ids"
+                                           widget="many2many_tags"
+                                           options="{'color_field': 'color', 'no_create_edit': True}"
+                                           placeholder="Select amenities (e.g. Slippers, Room Service, Toiletries)..."/>
+                                </group>
+                            </group>
+
+                            <group string="Description / Features">
+                                <field name="description" nolabel="1" placeholder="Write room description here..."/>
+                            </group>
+                        </page>
+                    </notebook>
+
                 </sheet>
             </form>
         </field>

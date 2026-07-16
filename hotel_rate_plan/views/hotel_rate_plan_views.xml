@@ -115,6 +115,18 @@
             <field name="view_mode">list,form</field>
         </record>
 
+        <record id="view_hotel_booking_form_inherit_package" model="ir.ui.view">
+            <field name="name">hotel.booking.form.inherit.package</field>
+            <field name="model">hotel.booking</field>
+            <field name="inherit_id" ref="hotel_management_core.view_hotel_booking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='deposit_amount']" position="after">
+                    <field name="package_id" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="fixed_package_price" force_save="1"/>
+                </xpath>
+            </field>
+        </record>
+
         <menuitem id="menu_hotel_pricing_root_independent"
                   name="Pricing &amp; Rates"
                   sequence="25"/>

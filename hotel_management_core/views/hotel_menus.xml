@@ -15,36 +15,44 @@
               parent="menu_hotel_management_root"
               sequence="90"/>
 
+    <menuitem id="menu_hotel_room_config_group"
+              name="Hotel &amp; Room Configuration"
+              parent="menu_hotel_configuration"
+              sequence="10"/>
+
+
     <menuitem id="menu_hotel_property"
               name="Hotels &amp; Resorts"
-              parent="menu_hotel_configuration"
+              parent="menu_hotel_room_config_group"
               action="action_hotel_property"
               sequence="10"/>
 
+
     <menuitem id="menu_hotel_room"
               name="Rooms &amp; Units"
-              parent="menu_hotel_configuration"
+              parent="menu_hotel_room_config_group"
               action="action_hotel_room"
               sequence="20"/>
 
+
     <menuitem id="menu_hotel_room_rate"
               name="Room Rates Setup"
-              parent="menu_hotel_configuration"
+              parent="menu_hotel_room_config_group"
               action="action_hotel_room_rate"
               sequence="30"/>
 
-
     <menuitem id="menu_hotel_dashboard_task"
               name="Live Dashboard"
-              parent="menu_hotel_operations"
+              parent="menu_hotel_management_root"
               action="action_hotel_room_dashboard_kanban_action_v5"
-              sequence="1"/>
+              sequence="5"/>
 
     <menuitem id="menu_hotel_guest"
               name="Guest Profiles"
-              parent="menu_hotel_operations"
+              parent="menu_hotel_management_root"
               action="action_hotel_guest"
-              sequence="10"/>
+              sequence="8"/>
+
 
     <menuitem id="menu_hotel_booking"
               name="Reservations"
@@ -57,6 +65,18 @@
               parent="menu_hotel_operations"
               action="action_hotel_folio"
               sequence="30"/>
+
+    <menuitem id="menu_hotel_building_sub"
+              name="Buildings / Towers"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_building"
+              sequence="12"/>
+
+    <menuitem id="menu_hotel_floor_sub"
+              name="Floors Setup"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_floor"
+              sequence="13"/>
 
 
 </odoo>

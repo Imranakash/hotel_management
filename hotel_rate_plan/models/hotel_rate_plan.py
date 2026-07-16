@@ -48,24 +48,6 @@ class HotelRatePlanLine(models.Model):
     extra_bed_charge = fields.Float(string="Extra Bed Charge", default=0.0)
 
 
-class HotelPackage(models.Model):
-    _name = 'hotel.package'
-    _description = 'Hotel Bundled Packages'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
-
-    name = fields.Char(string="Package Name", required=True, tracking=True)
-    code = fields.Char(string="Package Code", required=True, tracking=True)
-    valid_from = fields.Date(string="Valid From")
-    valid_to = fields.Date(string="Valid To")
-
-    price_mode = fields.Selection([
-        ('fixed', 'Fixed Package Price'),
-        ('dynamic', 'Dynamic (Room Rate + Add-ons)')
-    ], string="Price Mode", default='fixed', required=True,tracking=True)
-
-    fixed_package_price = fields.Float(string="Fixed Package Price", default=0.0,tracking=True)
-    inclusion_notes = fields.Text(string="Package Inclusions")
-
 
 class HotelProperty(models.Model):
     _inherit = 'hotel.property'

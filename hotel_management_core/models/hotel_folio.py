@@ -37,9 +37,7 @@ class HotelFolio(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             name = vals.get('name', '')
-            # যদি ডেসক্রিপশনে Room Charge বা Room শব্দটা থাকে
             if name and ('Room Charge' in name or 'Room' in name):
-                # সিস্টেমে থাকা আসল 'Room' প্রোডাক্টটি খুঁজে বের করা হচ্ছে
                 room_product = self.env['product.product'].sudo().search([('name', 'ilike', 'Room')], limit=1)
                 if room_product:
                     vals['product_id'] = room_product.id
@@ -150,16 +148,14 @@ class HotelFolio(models.Model):
             raise UserError(_("An invoice already exists for this folio!"))
 
         invoice_lines = []
-        for line in self.folio_line_ids:
-            product_id = line.product_id.id
 
-            if line.name and 'Room Charge' in line.name:
-                room_product = self.env['product.product'].search([('name', 'ilike', 'Room')], limit=1)
-                if room_product:
-                    product_id = room_product.id
+        room_product = self.env['product.product'].search([('name', 'ilike', 'Room')], limit=1)
+
+        for line in self.folio_line_ids:
+            product_id = line.product_id.id if line.product_id else (room_product.id if room_product else False)
 
             invoice_lines.append((0, 0, {
-                'name': line.name or line.product_id.name,
+                'name': line.name or (line.product_id.name if line.product_id else _("Room Charge/Adjustment")),
                 'quantity': line.quantity,
                 'price_unit': line.price_unit,
                 'product_id': product_id,

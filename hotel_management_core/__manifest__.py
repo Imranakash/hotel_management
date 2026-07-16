@@ -21,6 +21,7 @@
  'reports/folio_bill_report.xml',
  'wizards/room_move_wizard_views.xml',
  'wizards/hotel_booking_approval_wizard_view.xml',
+ 'wizards/hotel_checkin_wizard_views.xml',
  ],
  'application': True,
  'installable': True,

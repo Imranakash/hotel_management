@@ -45,7 +45,9 @@ class HotelRoom(models.Model):
     floor_id = fields.Many2one(
         'hotel.floor',
         string='Floor',
-        domain="[('property_id', '=', property_id), ('building_id', '=', building_id)]", tracking=True)
+        domain="[('property_id', '=', property_id), ('building_id', '=', building_id)]",
+        tracking=True
+    )
 
     zone_id = fields.Many2one(
         'hotel.zone',
@@ -73,21 +75,41 @@ class HotelRoom(models.Model):
         ('seasonal_closed', 'Seasonal Closed')
     ], string='Operational State', default='active', tracking=True, required=True)
 
-    amenity_ids = fields.Many2many(
-        'hotel.room.amenity',
-        string='Room Amenities',
-        help="Wi-Fi, Mini Bar, Bathtub, etc."
-    )
     hk_instruction = fields.Text(string='Housekeeping Special Instructions')
     internal_notes = fields.Text(string='Internal Management Notes')
 
-    @api.depends('room_number', 'room_type_id')
+    @api.onchange('property_id')
+    def _onchange_property_id(self):
+        self.building_id = False
+        self.floor_id = False
+
+    @api.onchange('building_id')
+    def _onchange_building_id(self):
+        current_floor_building = getattr(self.floor_id, 'building_id', False)
+        if current_floor_building and current_floor_building != self.building_id:
+            self.floor_id = False
+
+    @api.onchange('floor_id')
+    def _onchange_floor_id(self):
+        floor_building = getattr(self.floor_id, 'building_id', False)
+        if floor_building:
+            self.building_id = floor_building
+
+    @api.depends('room_number', 'room_type_id', 'building_id.name', 'floor_id.name')
     def _compute_display_name_custom(self):
         for record in self:
             if record.room_number and record.room_type_id:
                 record.name = f"Room {record.room_number} ({record.room_type_id.name})"
             else:
                 record.name = record.room_number or _("New Room")
+
+    def _compute_display_name(self):
+        for record in self:
+            building = record.building_id.name if record.building_id else "No Building"
+            floor = record.floor_id.name if record.floor_id else "No Floor"
+            record.display_name = f"Room {record.room_number or record.id} ({building} - {floor})"
+
+
 
     _sql_constraints = [
         ('unique_room_number_per_property', 'unique(room_number, property_id)',
@@ -154,9 +176,22 @@ class HotelRoom(models.Model):
             'target': 'new',
         }
 
+    @api.constrains('room_number', 'property_id')
+    def _check_unique_room_per_property(self):
+        for record in self:
+            if record.room_number and record.property_id:
+                duplicate_room = self.search([
+                    ('room_number', '=', record.room_number),
+                    ('property_id', '=', record.property_id.id),
+                    ('id', '!=', record.id)
+                ], limit=1)
 
-
-
+                if duplicate_room:
+                    raise ValidationError(_(
+                        "🚨 Business Rule Violation:\n"
+                        "The Room/Unit Number '%s' already exists in '%s'!\n"
+                        "Duplicate rooms are strictly prohibited."
+                    ) % (record.room_number, record.property_id.name))
 
 
 class HotelRoomAmenity(models.Model):
@@ -166,6 +201,7 @@ class HotelRoomAmenity(models.Model):
     name = fields.Char(string='Amenity Name', required=True)
     code = fields.Char(string='Amenity Code')
     description = fields.Text(string='Description')
+    color = fields.Integer(string='Color Index', default=0)
 
     _sql_constraints = [
         ('unique_amenity_code', 'unique(code)', 'Amenity code must be unique!')
@@ -200,3 +236,9 @@ class HotelRoomMaintenance(models.Model):
             record.write({'state': 'resolved'})
             if record.room_id.status == 'maintenance':
                 record.room_id.write({'status': 'available'})
+
+
+
+
+
+
