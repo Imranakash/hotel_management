@@ -78,5 +78,11 @@
               action="action_hotel_floor"
               sequence="13"/>
 
+    <menuitem id="menu_hotel_room_category"
+              name="Room Categories"
+              parent="menu_hotel_room_config_group"
+              action="hotel_management_core.action_hotel_room_category"
+              sequence="15"/>
+
 
 </odoo>
