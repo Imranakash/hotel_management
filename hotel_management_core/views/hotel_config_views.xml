@@ -21,7 +21,6 @@
         <field name="arch" type="xml">
             <form string="Room Category">
                 <sheet>
-                    <!-- প্রধান তথ্য -->
                     <div class="oe_title">
                         <label for="name" string="Room Type Name"/>
                         <h1>
@@ -58,7 +57,6 @@
                                     <field name="room_area"/>
                                 </group>
 
-                                <!-- ডানপাশে: এমেনিটিজ ট্যাগস -->
                                 <group string="ROOM AMENITIES">
                                     <field name="amenity_ids"
                                            widget="many2many_tags"
@@ -75,6 +73,42 @@
 
                 </sheet>
             </form>
+        </field>
+    </record>
+
+
+    <record id="view_hotel_room_type_kanban" model="ir.ui.view">
+        <field name="name">hotel.room.type.kanban</field>
+        <field name="model">hotel.room.type</field>
+        <field name="arch" type="xml">
+            <kanban sample="1" records_draggable="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="max_capacity"/>
+                <field name="bed_type"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click p-3 d-flex flex-column justify-content-between row-gap-2">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong class="fs-4 text-dark">✨ <field name="name"/></strong>
+                                    <span class="badge bg-primary text-uppercase"><field name="code"/></span>
+                                </div>
+
+                                <div class="text-muted small mb-1">
+                                    🛏️ Bed Type: <span class="fw-bold text-dark"><field name="bed_type"/></span>
+                                </div>
+                            </div>
+
+                            <div class="border-top pt-2 mt-1 d-flex justify-content-between align-items-center small text-muted">
+                                <span>👥 Max Capacity:</span>
+                                <span class="fw-bold text-danger fs-5"><field name="max_capacity"/> Persons</span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 

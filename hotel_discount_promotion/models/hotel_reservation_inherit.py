@@ -61,27 +61,37 @@ class HotelBookingInherit(models.Model):
                         record.approval_state = 'not_required'
                 else:
                     calculated_discount = record.manual_discount_value
-                    if record.manual_discount_value > 5000:
+
+                    limit_param = self.env['ir.config_parameter'].sudo().get_param('hotel.corporate_credit_limit',
+                                                                                   default='5000.0')
+                    credit_limit = float(limit_param)
+
+                    if record.manual_discount_value > credit_limit:
                         record.approval_state = 'pending'
                     else:
                         record.approval_state = 'not_required'
 
-            record.discount_amount = calculated_discount
+
 
     def action_approve_discount(self):
-
         for record in self:
-            sudo_record = record.sudo()
-            sudo_record.write({
-                'approval_state': 'approved',
-                'is_approved': True,
-                'state': 'confirmed'
-            })
+            self.env.cr.execute("""
+                UPDATE hotel_booking 
+                SET approval_state = %s, 
+                    is_approved = %s, 
+                    state = %s 
+                WHERE id = %s
+            """, ('approved', True, 'confirmed', record.id))
+
+            record.invalidate_recordset(['approval_state', 'is_approved', 'state'])
 
             if record.deposit_amount > 0.0:
-                sudo_record.write({'payment_state': 'partially_paid'})
+                self.env.cr.execute("UPDATE hotel_booking SET payment_state = 'partially_paid' WHERE id = %s",
+                                    (record.id,))
             else:
-                sudo_record.write({'payment_state': 'unpaid'})
+                self.env.cr.execute("UPDATE hotel_booking SET payment_state = 'unpaid' WHERE id = %s", (record.id,))
+
+            record.invalidate_recordset(['payment_state'])
 
             for line in record.room_line_ids:
                 if line.room_id:
@@ -89,7 +99,11 @@ class HotelBookingInherit(models.Model):
 
             record.message_post(body=_(
                 "<b>Discount Approved:</b> Manager %s approved the discount. Booking is now CONFIRMED.") % self.env.user.name)
-        return True
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
 
     def action_reject_discount(self):
         for record in self:
@@ -104,4 +118,8 @@ class HotelBookingInherit(models.Model):
                 'is_approved': False
             })
             record.message_post(body=_("<b>Discount Rejected:</b> Resetting booking parameters to Draft."))
-        return True
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }

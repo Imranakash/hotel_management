@@ -47,10 +47,67 @@
         </field>
     </record>
 
+
+    <record id="view_hotel_guest_kanban" model="ir.ui.view">
+        <field name="name">hotel.guest.kanban</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="vip_tier"/>
+                <field name="is_blacklisted_guest"/>
+                <field name="booking_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click d-flex gap-3 p-2 position-relative">
+
+                            <div class="o_kanban_image">
+                                <img t-att-src="'/web/image/res.partner/' + record.id.raw_value + '/avatar_128'"
+                                     alt="Guest Avatar"
+                                     class="o_image_64_cover rounded-circle"
+                                     onerror="this.src='/base/static/img/avatar_grey.png';"/>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start pr-5">
+                                    <strong class="fs-5 text-dark"><field name="name"/></strong>
+                                    <div>
+                                        <t t-if="record.is_blacklisted_guest.raw_value">
+                                            <span class="badge bg-danger">⚠️ BLACKLISTED</span>
+                                        </t>
+                                        <t t-elif="record.vip_tier.raw_value and record.vip_tier.raw_value != 'regular'">
+                                            <span class="badge bg-info text-uppercase"><field name="vip_tier"/></span>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <div class="text-muted small mt-1">
+                                    <t t-if="record.phone.raw_value">📞 <field name="phone"/><br/></t>
+                                    <t t-if="record.email.raw_value">✉️ <field name="email"/></t>
+                                </div>
+                            </div>
+
+                            <div class="position-absolute bottom-0 end-0 m-2">
+                                <span class="badge rounded-pill bg-primary p-2 fs-6" title="Total Bookings">
+                                    📅 <t t-esc="record.booking_count.raw_value || 0"/> Bookings
+                                </span>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+
     <record id="action_hotel_guest" model="ir.actions.act_window">
         <field name="name">Guest Profiles</field>
         <field name="res_model">res.partner</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('is_hotel_guest', '=', True)]</field>
         <field name="context">{'default_is_hotel_guest': True}</field>
     </record>

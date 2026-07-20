@@ -80,10 +80,57 @@
     </field>
 </record>
 
+    <!-- 🌟 হোটেল রুমের জন্য ওডু ১৯ স্ট্যান্ডার্ড কাস্টম কানবান ভিউ -->
+    <record id="view_hotel_room_kanban" model="ir.ui.view">
+        <field name="name">hotel.room.kanban</field>
+        <field name="model">hotel.room</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" sample="1" records_draggable="false">
+                <field name="id"/>
+                <field name="room_number"/>
+                <field name="room_type_id"/>
+                <field name="building_id"/>
+                <field name="floor_id"/>
+                <field name="status"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click p-3 d-flex flex-column justify-content-between row-gap-2">
+                            <div>
+                                <!-- রুম নাম্বার এবং স্ট্যাটাস ব্যাজ -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="fs-4 text-dark">🚪 Room <field name="room_number"/></strong>
+
+                                    <!-- স্ট্যাটাস অনুযায়ী ওডু ১৯ বুটস্ট্র্যাপ রঙিন ব্যাজ -->
+                                    <span t-if="record.status.raw_value == 'available'" class="badge bg-success text-uppercase">Available</span>
+                                    <span t-elif="record.status.raw_value == 'dirty'" class="badge bg-danger text-uppercase">Dirty</span>
+                                    <span t-elif="record.status.raw_value == 'clean'" class="badge bg-warning text-dark text-uppercase">Clean</span>
+                                    <span t-elif="record.status.raw_value == 'maintenance'" class="badge bg-secondary text-uppercase">Maintenance</span>
+                                    <span t-else="" class="badge bg-info text-uppercase"><field name="status"/></span>
+                                </div>
+
+                                <!-- ক্যাটাগরি বা টাইপ -->
+                                <div class="fw-bold text-primary mb-1">
+                                    ✨ <field name="room_type_id"/>
+                                </div>
+                            </div>
+
+                            <!-- লোকেশন ডিটেইলস (বিল্ডিং ও ফ্লোর) -->
+                            <div class="d-flex gap-2 border-top pt-2 mt-1 text-muted small">
+                                <span>🏢 <field name="building_id"/></span>
+                                <span>•</span>
+                                <span>📶 <field name="floor_id"/></span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="action_hotel_room" model="ir.actions.act_window">
         <field name="name">Rooms</field>
         <field name="res_model">hotel.room</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
     </record>
 
     <record id="action_hotel_building" model="ir.actions.act_window">
@@ -136,13 +183,12 @@
     <record id="action_hotel_room_category" model="ir.actions.act_window">
         <field name="name">Room Categories</field>
         <field name="res_model">hotel.room.type</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first Room Category!
             </p>
         </field>
     </record>
-
 
 </odoo>

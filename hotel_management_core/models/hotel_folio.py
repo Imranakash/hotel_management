@@ -30,18 +30,46 @@ class HotelFolio(models.Model):
     invoice_count = fields.Integer(compute='_compute_invoice_count', string='Invoice Count')
     property_id = fields.Many2one('hotel.property', string='Property/Hotel', required=True)
 
-    # NEW: direct link to invoices, replaces folio_no/partner_id text matching
     invoice_ids = fields.One2many('account.move', 'folio_id', string='Invoices')
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            if vals.get('folio_no', _('New')) == _('New'):
+                vals['folio_no'] = self.env['ir.sequence'].next_by_code('hotel.folio') or _('New')
+
             name = vals.get('name', '')
-            if name and ('Room Charge' in name or 'Room' in name):
+            if name and ('Room Charge' in name or 'Room' in name) and 'Extra Bed' not in name:
                 room_product = self.env['product.product'].sudo().search([('name', 'ilike', 'Room')], limit=1)
                 if room_product:
                     vals['product_id'] = room_product.id
-        return super().create(vals_list)
+
+        folios = super(HotelFolio, self).create(vals_list)
+
+        for folio in folios:
+            if folio.booking_id:
+                num_of_days = folio.booking_id.duration_days if folio.booking_id.duration_days > 0 else 1
+
+                bed_product = self.env['product.product'].sudo().search([('default_code', '=', 'EXTRA_BED')], limit=1)
+
+                if not bed_product:
+                    bed_product = self.env['product.product'].sudo().search([('name', 'ilike', 'Extra Bed')], limit=1)
+                if not bed_product:
+                    bed_product = self.env['product.product'].sudo().search([('name', 'ilike', 'Room')], limit=1)
+
+                for line in folio.booking_id.room_line_ids:
+                    if line.extra_bed_count > 0 and line.extra_bed_rate > 0:
+                        self.env['hotel.folio.line'].create({
+                            'folio_id': folio.id,
+                            'product_id': bed_product.id if bed_product else False,
+                            'name': _("Extra Bed Charge: %s (%s Bed(s) x %s Night(s))") % (line.room_type_id.name,
+                                                                                           line.extra_bed_count,
+                                                                                           num_of_days),
+                            'quantity': line.extra_bed_count * num_of_days,
+                            'price_unit': line.extra_bed_rate,
+                        })
+
+        return folios
 
 
     @api.depends('folio_line_ids.price_subtotal')

@@ -177,9 +177,58 @@
         </field>
     </record>
 
+    <record id="view_hotel_booking_kanban" model="ir.ui.view">
+        <field name="name">hotel.booking.kanban</field>
+        <field name="model">hotel.booking</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="guest_id"/>
+                <field name="property_id"/>
+                <field name="checkin_date"/>
+                <field name="checkout_date"/>
+                <field name="payment_state"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-primary fs-5"><field name="name"/></span>
+                                <field name="payment_state" widget="badge"
+                                       decoration-success="payment_state == 'paid'"
+                                       decoration-warning="payment_state == 'partially_paid'"
+                                       decoration-danger="payment_state == 'unpaid'"/>
+                            </div>
+
+                            <div class="mb-2 fw-semibold text-dark">
+                                👤 <field name="guest_id"/>
+                            </div>
+
+                            <div class="small text-muted mb-2">
+                                🏨 <field name="property_id"/>
+                            </div>
+
+                            <div class="row pt-2 border-top text-muted small row-gap-1">
+                                <div class="col-6">
+                                    🧳 <field name="checkin_date"/>
+                                    <div class="text-xxs text-uppercase tracking-wider">Arrival</div>
+                                </div>
+                                <div class="col-6 text-end">
+                                    🛎️ <field name="checkout_date"/>
+                                    <div class="text-xxs text-uppercase tracking-wider">Departure</div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="action_hotel_booking" model="ir.actions.act_window">
         <field name="name">Reservations</field>
         <field name="res_model">hotel.booking</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
     </record>
 </odoo>

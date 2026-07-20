@@ -190,15 +190,17 @@ class HotelBooking(models.Model):
                 if vals:
                     record.guest_id.write(vals)
 
-
-    @api.depends('room_line_ids.price_unit', 'room_line_ids.extra_bed_count', 'duration_days')
+    @api.depends('room_line_ids.price_unit', 'room_line_ids.extra_bed_count', 'room_line_ids.extra_bed_rate',
+                 'duration_days')
     def _compute_room_subtotal(self):
         for record in self:
             num_of_days = record.duration_days if record.duration_days > 0 else 1
+
             record.room_subtotal = sum(
-                (line.price_unit * num_of_days) + (line.extra_bed_count * 500.0)
+                (line.price_unit * num_of_days) + (line.extra_bed_count * line.extra_bed_rate * num_of_days)
                 for line in record.room_line_ids
             )
+
 
     @api.depends('folio_ids', 'folio_ids.invoice_ids', 'folio_ids.invoice_ids.payment_state', 'deposit_amount', 'state')
     def _compute_payment_state(self):
@@ -302,9 +304,11 @@ class HotelBooking(models.Model):
                 raise UserError(_("Cannot confirm reservation. Please allocate at least one room category/line."))
 
             if record.booking_source == 'corporate' and record.guest_id:
-                credit_limit = 5000.0
-                current_receivable = 0.0
+                limit_param = self.env['ir.config_parameter'].sudo().get_param('hotel.corporate_credit_limit',
+                                                                               default='5000.0')
+                credit_limit = float(limit_param)
 
+                current_receivable = 0.0
                 total_booking_cost = record.room_subtotal
 
                 if (current_receivable + total_booking_cost) > credit_limit and not record.is_credit_approved:
@@ -361,7 +365,7 @@ class HotelBooking(models.Model):
                             'type': 'warning',
                             'next': {'type': 'ir.actions.client', 'tag': 'reload'},
                         }
-                }
+                    }
 
             for line in record.room_line_ids:
                 if line.room_id:
@@ -387,12 +391,10 @@ class HotelBooking(models.Model):
     def action_approve_discount(self):
         for record in self:
             sudo_record = record.sudo()
-
             vals = {
                 'approval_state': 'approved',
                 'state': 'confirmed',
             }
-
             if record.is_credit_exceeded:
                 vals.update({'is_credit_approved': True, 'is_approved': True})
                 record.message_post(body=_(
@@ -404,11 +406,9 @@ class HotelBooking(models.Model):
 
             sudo_record.write(vals)
 
-
             for line in record.room_line_ids:
                 if line.room_id:
                     line.room_id.sudo().write({'status': 'reserved'})
-
         return True
 
     def action_reject_discount(self):
@@ -423,6 +423,10 @@ class HotelBooking(models.Model):
             })
             record.message_post(body=_("<b>Approval Rejected:</b> Resetting booking parameters to Draft."))
         return True
+
+
+
+
 
     def action_actual_check_in(self):
         self.flush_recordset()
@@ -902,6 +906,20 @@ class HotelBookingRoomLine(models.Model):
 
     price_unit = fields.Float(string='Rate per Night', readonly=True, required=True, default=0.0, store=True)
     extra_bed_count = fields.Integer(string='Extra Beds', default=0)
+
+    extra_bed_rate = fields.Float(string='Extra Bed Rate', compute='_compute_extra_bed_rate', store=True)
+
+    @api.depends('room_type_id', 'booking_id.property_id')
+    def _compute_extra_bed_rate(self):
+        for line in self:
+            if line.booking_id and line.booking_id.property_id and line.room_type_id:
+                rate_setup = self.env['hotel.room.rate'].search([
+                    ('property_id', '=', line.booking_id.property_id.id),
+                    ('room_type_id', '=', line.room_type_id.id)
+                ], limit=1)
+                line.extra_bed_rate = rate_setup.extra_bed_rate if rate_setup else 0.0
+            else:
+                line.extra_bed_rate = 0.0
 
     @api.onchange('room_type_id', 'booking_id.checkin_date', 'booking_id.checkout_date')
     def _onchange_room_availability_filter(self):

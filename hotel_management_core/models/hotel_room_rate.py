@@ -11,6 +11,7 @@ class HotelRoomRate(models.Model):
     room_type_id = fields.Many2one('hotel.room.type', string='Room Category', required=True)
     fixed_rate = fields.Float(string='Rate per Night', digits=(16, 2), required=True)
     max_discount = fields.Float(string="Maximum Discount", digits=(16, 2), default=0.0)
+    extra_bed_rate = fields.Float(string='Extra Bed Rate per Night', default=0.0)
 
     _sql_constraints = [
         ('unique_property_room_type', 'unique(property_id, room_type_id)',
