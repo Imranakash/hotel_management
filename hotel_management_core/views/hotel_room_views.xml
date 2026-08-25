@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_hotel_room_form" model="ir.ui.view">
+        <field name="name">hotel.room.form</field>
+        <field name="model">hotel.room</field>
+        <field name="arch" type="xml">
+            <form string="Hotel Room">
+                <header>
+                    <button name="action_set_room_clean"
+                            string="🧹 Mark as Cleaned"
+                            type="object"
+                            class="btn-primary"
+                            invisible="status != 'dirty'"/>
+
+                    <button name="action_set_room_inspected"
+                            string="✅ Inspect &amp; Make Available"
+                            type="object"
+                            class="btn-success"
+                            invisible="status != 'clean'"/>
+
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="room_number"/>
+                            <field name="property_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="room_type_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="status"/>
+                        </group>
+                        <group string="Location Details">
+                            <field name="building_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="floor_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_room_list" model="ir.ui.view">
+        <field name="name">hotel.room.list</field>
+        <field name="model">hotel.room</field>
+        <field name="arch" type="xml">
+            <list string="Hotel Rooms">
+                <field name="room_number"/>
+                <field name="room_type_id"/>
+                <field name="property_id"/>
+                <field name="building_id" optional="show"/>
+                <field name="floor_id" optional="show"/>
+                <field name="status"
+                       widget="badge"
+                       decoration-danger="status == 'dirty'"
+                       decoration-warning="status == 'clean'"
+                       decoration-success="status == 'available'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hotel_room_search" model="ir.ui.view">
+    <field name="name">hotel.room.search</field>
+    <field name="model">hotel.room</field>
+    <field name="arch" type="xml">
+        <search string="Search Rooms">
+            <field name="room_number"/>
+            <field name="property_id"/>
+            <field name="room_type_id"/>
+            <field name="building_id"/>
+            <filter string="Available Rooms" name="filter_available" domain="[('status', '=', 'available')]"/>
+            <filter string="Dirty/Housekeeping Required" name="filter_dirty" domain="[('status', '=', 'dirty')]"/>
+            <filter string="Clean (Need Inspection)" name="filter_clean" domain="[('status', '=', 'clean')]"/>
+            <filter string="Under Maintenance" name="filter_maintenance" domain="[('status', '=', 'maintenance')]"/>
+            <separator/>
+            <filter string="Active Operational" name="filter_op_active"
+                    domain="[('operational_status', '=', 'active')]"/>
+
+        </search>
+    </field>
+</record>
+
+    <!-- 🌟 হোটেল রুমের জন্য ওডু ১৯ স্ট্যান্ডার্ড কাস্টম কানবান ভিউ -->
+    <record id="view_hotel_room_kanban" model="ir.ui.view">
+        <field name="name">hotel.room.kanban</field>
+        <field name="model">hotel.room</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" sample="1" records_draggable="false">
+                <field name="id"/>
+                <field name="room_number"/>
+                <field name="room_type_id"/>
+                <field name="building_id"/>
+                <field name="floor_id"/>
+                <field name="status"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click p-3 d-flex flex-column justify-content-between row-gap-2">
+                            <div>
+                                <!-- রুম নাম্বার এবং স্ট্যাটাস ব্যাজ -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="fs-4 text-dark">🚪 Room <field name="room_number"/></strong>
+
+                                    <!-- স্ট্যাটাস অনুযায়ী ওডু ১৯ বুটস্ট্র্যাপ রঙিন ব্যাজ -->
+                                    <span t-if="record.status.raw_value == 'available'" class="badge bg-success text-uppercase">Available</span>
+                                    <span t-elif="record.status.raw_value == 'dirty'" class="badge bg-danger text-uppercase">Dirty</span>
+                                    <span t-elif="record.status.raw_value == 'clean'" class="badge bg-warning text-dark text-uppercase">Clean</span>
+                                    <span t-elif="record.status.raw_value == 'maintenance'" class="badge bg-secondary text-uppercase">Maintenance</span>
+                                    <span t-else="" class="badge bg-info text-uppercase"><field name="status"/></span>
+                                </div>
+
+                                <!-- ক্যাটাগরি বা টাইপ -->
+                                <div class="fw-bold text-primary mb-1">
+                                    ✨ <field name="room_type_id"/>
+                                </div>
+                            </div>
+
+                            <!-- লোকেশন ডিটেইলস (বিল্ডিং ও ফ্লোর) -->
+                            <div class="d-flex gap-2 border-top pt-2 mt-1 text-muted small">
+                                <span>🏢 <field name="building_id"/></span>
+                                <span>•</span>
+                                <span>📶 <field name="floor_id"/></span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_hotel_room" model="ir.actions.act_window">
+        <field name="name">Rooms</field>
+        <field name="res_model">hotel.room</field>
+        <field name="view_mode">list,kanban,form</field>
+    </record>
+
+    <record id="action_hotel_building" model="ir.actions.act_window">
+        <field name="name">Buildings</field>
+        <field name="res_model">hotel.building</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_hotel_floor_list_real" model="ir.ui.view">
+        <field name="name">hotel.floor.list.real</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <list string="Floors">
+                <field name="name"/>
+                <field name="building_id"/>
+                <field name="property_id" string="Parent Property"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hotel_floor_form_real" model="ir.ui.view">
+        <field name="name">hotel.floor.form.real</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <form string="Floor">
+                <sheet>
+                    <group>
+                        <group string="Floor Info">
+                            <field name="name"/>
+                            <field name="property_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group string="Location Info">
+                            <field name="building_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hotel_floor" model="ir.actions.act_window">
+        <field name="name">Floors</field>
+        <field name="res_model">hotel.floor</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_hotel_floor_list_real')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_hotel_floor_form_real')})]"/>
+    </record>
+
+    <record id="action_hotel_room_category" model="ir.actions.act_window">
+        <field name="name">Room Categories</field>
+        <field name="res_model">hotel.room.type</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Room Category!
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hotel_rate_plan,hotel.rate.plan,model_hotel_rate_plan,base.group_user,1,1,1,1
+access_hotel_rate_plan_line,hotel.rate.plan.line,model_hotel_rate_plan_line,base.group_user,1,1,1,1
+access_hotel_package,hotel.package,model_hotel_package,base.group_user,1,1,1,1

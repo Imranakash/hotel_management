@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- List View -->
+        <record id="view_hotel_lost_found_tree" model="ir.ui.view">
+            <field name="name">hotel.lost.found.list</field>
+            <field name="model">hotel.lost.found</field>
+            <field name="arch" type="xml">
+                <list string="Lost &amp; Found Items" decoration-info="state == 'found'" decoration-warning="state == 'notified'" decoration-success="state == 'returned'">
+                    <field name="item_no"/>
+                    <field name="room_id"/>
+                    <field name="guest_id"/>
+                    <field name="found_by"/>
+                    <field name="found_date"/>
+                    <field name="storage_location"/>
+                    <field name="state" widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_hotel_lost_found_form" model="ir.ui.view">
+            <field name="name">hotel.lost.found.form</field>
+            <field name="model">hotel.lost.found</field>
+            <field name="arch" type="xml">
+                <form string="Lost &amp; Found Item">
+                    <header>
+                        <button name="action_notify_guest" string="Notify Guest" type="object" class="oe_highlight"
+                                invisible="state != 'found'"/>
+                        <button name="action_return_item" string="Return to Guest" type="object" class="btn-success"
+                                invisible="state not in ['found', 'notified']"/>
+                        <field name="state" widget="statusbar" statusbar_visible="found,notified,returned"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="item_no"/></h1>
+                        </div>
+                        <group>
+                            <group string="Item Details">
+                                <field name="item_description" placeholder="Describe the item..."/>
+                                <field name="storage_location" placeholder="e.g., Locker Room A"/>
+                            </group>
+                            <group string="Discovery Info">
+                                <field name="room_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="found_by" options="{'no_create': True, 'no_quick_create': True}"/>
+                                <field name="found_date"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Guest Connection">
+                                <field name="guest_id" options="{'no_quick_create': True, 'no_open': True}"/>
+                                <field name="booking_id" options="{'no_create': True, 'no_open': True}"/>
+                            </group>
+                            <group string="Item Preview">
+                                <field name="photo" widget="image" class="oe_avatar"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="view_hotel_lost_found_kanban" model="ir.ui.view">
+            <field name="name">hotel.lost.found.kanban</field>
+            <field name="model">hotel.lost.found</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" sample="1" records_draggable="false">
+                    <field name="id"/>
+                    <field name="item_no"/>
+                    <field name="room_id"/>
+                    <field name="guest_id"/>
+                    <field name="item_description"/>
+                    <field name="state"/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_global_click d-flex gap-3 p-2 position-relative">
+
+                                <div class="o_kanban_image">
+                                    <img t-att-src="'/web/image/hotel.lost.found/' + record.id.raw_value + '/photo'"
+                                         alt="Item Image"
+                                         class="o_image_64_cover rounded"
+                                         onerror="this.src='/base/static/img/avatar_grey.png';"/>
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <strong class="fs-5 text-dark">📦 <field name="item_no"/></strong>
+                                        <span class="badge bg-secondary">🚪 <field name="room_id"/></span>
+                                    </div>
+
+                                    <div class="text-dark fw-bold small mt-1">
+                                        <field name="item_description"/>
+                                    </div>
+
+                                    <div class="text-muted small mt-1">
+                                        <t t-if="record.guest_id.raw_value">👤 Guest: <field name="guest_id"/></t>
+                                        <t t-else="">👤 Guest: <span class="text-warning">Unknown</span></t>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="action_hotel_lost_found" model="ir.actions.act_window">
+            <field name="name">Lost &amp; Found Management</field>
+            <field name="res_model">hotel.lost.found</field>
+            <field name="view_mode">list,kanban,form</field>
+        </record>
+    </data>
+</odoo>

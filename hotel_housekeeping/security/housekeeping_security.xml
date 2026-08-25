@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Housekeeping Staff Group -->
+    <record id="group_housekeeping_staff" model="res.groups">
+        <field name="name">Staff (Housekeeper)</field>
+    </record>
+
+    <!-- Housekeeping Manager Group -->
+    <record id="group_housekeeping_manager" model="res.groups">
+        <field name="name">Manager / Supervisor</field>
+        <field name="implied_ids" eval="[(4, ref('group_housekeeping_staff'))]"/>
+    </record>
+
+    <!-- Record Rule: Staff can only see assigned tasks -->
+    <record id="rule_housekeeping_task_staff" model="ir.rule">
+        <field name="name">Housekeeping Staff: Own Tasks Only</field>
+        <field name="model_id" ref="model_hotel_housekeeping_task"/>
+        <field name="domain_force">[('assigned_to', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_housekeeping_staff'))]"/>
+    </record>
+
+    <!-- Record Rule: Manager can see ALL tasks -->
+    <record id="rule_housekeeping_task_manager" model="ir.rule">
+        <field name="name">Housekeeping Manager: All Tasks</field>
+        <field name="model_id" ref="model_hotel_housekeeping_task"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_housekeeping_manager'))]"/>
+    </record>
+</odoo>

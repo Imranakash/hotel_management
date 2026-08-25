@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="menu_hk_task_child"
+                  name="Housekeeping Tasks"
+                  parent="hotel_management_core.menu_hotel_operations"
+                  action="action_hotel_housekeeping_task"
+                  sequence="40"/>
+
+        <menuitem id="menu_hk_lost_found"
+                  name="Lost &amp; Found"
+                  parent="hotel_management_core.menu_hotel_operations"
+                  action="action_hotel_lost_found"
+                  sequence="50"/>
+
+        <menuitem id="menu_hk_checklist_child"
+                  name="Master Checklists"
+                  parent="hotel_management_core.menu_hotel_configuration"
+                  action="action_hotel_housekeeping_checklist"
+                  sequence="40"/>
+    </data>
+</odoo>

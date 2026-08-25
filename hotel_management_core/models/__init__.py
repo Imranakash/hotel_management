@@ -11,4 +11,3 @@ from . import hotel_dashboard
 from . import hotel_room_rate
 from . import hotel_cancellation_policy
 
-

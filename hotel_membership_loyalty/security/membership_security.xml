@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="group_membership_staff" model="res.groups">
+            <field name="name">Membership &amp; Loyalty: Staff</field>
+        </record>
+
+        <record id="group_membership_manager" model="res.groups">
+            <field name="name">Membership &amp; Loyalty: Manager</field>
+            <field name="implied_ids" eval="[(4, ref('group_membership_staff'))]"/>
+        </record>
+    </data>
+
+    <data noupdate="1">
+        <record id="seq_hotel_membership_card" model="ir.sequence">
+            <field name="name">Hotel Membership Card Sequence</field>
+            <field name="code">hotel.membership.card.seq</field>
+            <field name="prefix">MEM-</field>
+            <field name="padding">6</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_hotel_membership_config_root"
+              name="Loyalty &amp; Membership"
+              parent="hotel_management_core.menu_hotel_configuration"
+              sequence="95"/>
+
+
+    <menuitem id="menu_hotel_loyalty_transactions"
+              name="Loyalty Ledgers"
+              parent="menu_hotel_membership_config_root"
+              action="action_hotel_loyalty_history"
+              sequence="10"/>
+
+
+    <menuitem id="menu_hotel_loyalty_rules"
+              name="Points Earning Rules"
+              parent="menu_hotel_membership_config_root"
+              action="action_hotel_loyalty_rule"
+              sequence="20"/>
+
+
+    <menuitem id="menu_hotel_membership_tiers"
+              name="VIP Tiers Config"
+              parent="menu_hotel_membership_config_root"
+              action="action_hotel_membership_tier"
+              sequence="30"/>
+</odoo>

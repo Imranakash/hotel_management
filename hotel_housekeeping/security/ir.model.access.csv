@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hk_checklist_mgr,hk.checklist.mgr,model_hotel_housekeeping_checklist,hotel_housekeeping.group_housekeeping_manager,1,1,1,1
+access_hk_checklist_line_mgr,hk.checklist.line.mgr,model_hotel_housekeeping_checklist_line,hotel_housekeeping.group_housekeeping_manager,1,1,1,1
+access_hk_task_staff,hk.task.staff,model_hotel_housekeeping_task,hotel_housekeeping.group_housekeeping_staff,1,1,1,0
+access_hk_task_mgr,hk.task.mgr,model_hotel_housekeeping_task,hotel_housekeeping.group_housekeeping_manager,1,1,1,1
+access_hk_task_line_staff,hk.task.line.staff,model_hotel_housekeeping_task_line,hotel_housekeeping.group_housekeeping_staff,1,1,1,1
+access_lost_found_staff,lost.found.staff,model_hotel_lost_found,hotel_housekeeping.group_housekeeping_staff,1,1,1,0
+access_lost_found_mgr,lost.found.mgr,model_hotel_lost_found,hotel_housekeeping.group_housekeeping_manager,1,1,1,1

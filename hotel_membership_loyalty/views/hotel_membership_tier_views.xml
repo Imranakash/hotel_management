@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VIP Tier List View -->
+    <record id="view_hotel_membership_tier_list" model="ir.ui.view">
+        <field name="name">hotel.membership.tier.list</field>
+        <field name="model">hotel.membership.tier</field>
+        <field name="arch" type="xml">
+            <list string="Membership Tiers">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="min_points"/>
+                <field name="discount_room"/>
+                <field name="discount_fnb"/>
+                <field name="free_night_points"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- VIP Tier Form View -->
+    <record id="view_hotel_membership_tier_form" model="ir.ui.view">
+        <field name="name">hotel.membership.tier.form</field>
+        <field name="model">hotel.membership.tier</field>
+        <field name="arch" type="xml">
+            <form string="Membership Tier">
+                <sheet>
+                    <group>
+                        <group string="Basic Info">
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="sequence" groups="base.group_no_one"/>
+                        </group>
+                        <group string="Rules &amp; Discounts">
+                            <field name="min_points"/>
+                            <field name="discount_room"/>
+                            <field name="discount_fnb"/>
+                            <field name="free_night_points"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Included Benefits" name="benefits">
+                            <field name="benefit_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_hotel_membership_tier" model="ir.actions.act_window">
+        <field name="name">VIP Tiers Config</field>
+        <field name="res_model">hotel.membership.tier</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

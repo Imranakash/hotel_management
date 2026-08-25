@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hotel_room_move_wizard_form" model="ir.ui.view">
+        <field name="name">hotel.room.move.wizard.form</field>
+        <field name="model">hotel.room.move.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Move Guest Room">
+                <sheet>
+                    <field name="booking_id" invisible="1"/>
+                    <field name="property_id" invisible="1"/>
+                    <field name="room_domain" invisible="1"/>
+
+                    <group>
+                        <group>
+                            <field name="filter_same_type"/>
+                            <field name="current_room_id"/>
+                            <field name="new_room_id"
+                                   domain="room_domain"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                        <group string="Reason">
+                            <field name="reason"/>
+                        </group>
+                    </group>
+
+                    <div invisible="not folio_impact_msg" class="w-100 clearfix">
+                        <div class="alert alert-info" role="alert"
+                             style="font-weight: bold; font-size: 14px; width: 100% !important; clear: both; display: block; margin-top: 15px;">
+                            <field name="folio_impact_msg" nolabel="1"/>
+                        </div>
+                    </div>
+
+            <footer>
+                <button name="action_confirm_move" string="Confirm &amp; Move Room" type="object" class="btn-primary"/>
+                <button string="Cancel" class="btn-secondary" special="cancel"/>
+            </footer>
+        </sheet>
+    </form>
+</field>
+        </record>
+        </odoo>
