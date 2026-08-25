@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- list View -->
+    <record id="view_hotel_cancellation_policy_list" model="ir.ui.view">
+        <field name="name">hotel.cancellation.policy.list</field>
+        <field name="model">hotel.cancellation.policy</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="property_id"/>
+                <field name="name"/>
+                <field name="days_before"/>
+                <field name="refund_percentage"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_hotel_cancellation_policy" model="ir.actions.act_window">
+        <field name="name">Cancellation Rules</field>
+        <field name="res_model">hotel.cancellation.policy</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

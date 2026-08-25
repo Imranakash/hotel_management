@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root Menu -->
+    <menuitem id="menu_hotel_management_root"
+              name="Hotel Management"
+              sequence="10"/>
+
+    <!-- 1. Live Dashboard (Officer & Manager সবাই পাবে) -->
+    <menuitem id="menu_hotel_dashboard_task"
+              name="Live Dashboard"
+              parent="menu_hotel_management_root"
+              action="action_hotel_room_dashboard_kanban_action_v5"
+              sequence="5"/>
+
+    <!-- 2. Guest Profiles (Officer & Manager সবাই পাবে) -->
+    <menuitem id="menu_hotel_guest"
+              name="Guest Profiles"
+              parent="menu_hotel_management_root"
+              action="action_hotel_guest"
+              groups="hotel_management_core.group_hotel_frontdesk_officer,hotel_management_core.group_hotel_frontdesk_manager"
+              sequence="8"/>
+
+    <!-- 3. Operations Menu (Officer & Manager সবাই পাবে) -->
+    <menuitem id="menu_hotel_operations"
+              name="Operations"
+              parent="menu_hotel_management_root"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_booking"
+              name="Reservations"
+              parent="menu_hotel_operations"
+              action="action_hotel_booking"
+              groups="hotel_management_core.group_hotel_frontdesk_officer,hotel_management_core.group_hotel_frontdesk_manager"
+              sequence="20"/>
+
+    <menuitem id="menu_hotel_folio"
+              name="Hotel Folios"
+              parent="menu_hotel_operations"
+              action="action_hotel_folio"
+              groups="hotel_management_core.group_hotel_frontdesk_officer,hotel_management_core.group_hotel_frontdesk_manager"
+              sequence="30"/>
+
+    <!-- 4. Configuration Menu (🎯 শুধুমাত্র Manager পাবে) -->
+    <menuitem id="menu_hotel_configuration"
+              name="Configuration"
+              parent="menu_hotel_management_root"
+              groups="hotel_management_core.group_hotel_frontdesk_manager"
+              sequence="90"/>
+
+    <menuitem id="menu_hotel_room_config_group"
+              name="Hotel &amp; Room Configuration"
+              parent="menu_hotel_configuration"
+              groups="hotel_management_core.group_hotel_frontdesk_manager"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_property"
+              name="Hotels &amp; Resorts"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_property"
+              sequence="10"/>
+
+    <menuitem id="menu_hotel_building_sub"
+              name="Buildings / Towers"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_building"
+              sequence="12"/>
+
+    <menuitem id="menu_hotel_floor_sub"
+              name="Floors Setup"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_floor"
+              sequence="13"/>
+
+    <menuitem id="menu_hotel_room_amenity"
+              name="Room Amenities"
+              action="action_hotel_room_amenity"
+              parent="menu_hotel_room_config_group"
+              sequence="14"/>
+
+    <menuitem id="menu_hotel_room_category"
+              name="Room Categories"
+              parent="menu_hotel_room_config_group"
+              action="hotel_management_core.action_hotel_room_category"
+              sequence="15"/>
+
+    <menuitem id="menu_hotel_room"
+              name="Rooms &amp; Units"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_room"
+              sequence="20"/>
+
+    <menuitem id="menu_hotel_room_rate"
+              name="Room Rates Setup"
+              parent="menu_hotel_room_config_group"
+              action="action_hotel_room_rate"
+              sequence="30"/>
+
+    <menuitem id="menu_hotel_cancellation_policy"
+              name="Cancellation Rules"
+              parent="menu_hotel_configuration"
+              action="action_hotel_cancellation_policy"
+              groups="hotel_management_core.group_hotel_frontdesk_manager"
+              sequence="40"/>
+
+    <menuitem id="menu_hotel_room_availability_wizard"
+          name="Room Availability"
+          parent="menu_hotel_operations"
+          action="action_hotel_room_availability_wizard"
+          groups="hotel_management_core.group_hotel_frontdesk_officer,hotel_management_core.group_hotel_frontdesk_manager"
+          sequence="25"/>
+
+</odoo>
